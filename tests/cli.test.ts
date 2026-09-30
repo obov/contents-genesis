@@ -174,9 +174,9 @@ test("invalid additions leave project.json unchanged", () => {
 test("skills link, list and unlink without touching project-owned skills", () => {
   const root = init("--no-renderer");
   expect(cg(root, "skill", "add", "kit-chatgpt-image").ok).toBe(true);
-  expect(project(root).skills).toEqual(["kit-chatgpt-image"]);
+  expect(project(root).skills).toEqual(["cg-context", "kit-chatgpt-image"]);
   const list = json(cg(root, "skill", "list"));
-  expect(list.shared[0]).toEqual({ name: "kit-chatgpt-image", linked: true });
+  expect(list.shared[1]).toEqual({ name: "kit-chatgpt-image", linked: true });
   expect(cg(root, "skill", "remove", "kit-chatgpt-image").ok).toBe(true);
   expect(existsSync(resolve(root, ".agents/skills/kit-chatgpt-image"))).toBe(
     false,

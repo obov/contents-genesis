@@ -115,6 +115,30 @@ cg skill list | add <name> | remove <name> | link
 
 Claude Code 플러그인으로도 사용 가능 (`.claude-plugin/marketplace.json`).
 
+## 구성 추적과 에이전트 context
+
+cg를 실행할 때마다 프로젝트 구성(모듈, pipeline, 기본 pipeline, 공유·프로젝트 스킬, 로컬 파일 hash)을 `.cg/state.json`과 비교합니다.
+변경 사항은 `.cg/history.jsonl`에 기록되고, `.cg/`는 Git으로 관리합니다.
+
+| source | 의미 |
+|---|---|
+| `baseline` | 추적을 시작한 시점의 구성 |
+| `cg` | cg 명령으로 바꾼 변경. `command`와 `actor`(human / agent:claude-code / agent:codex / `CG_ACTOR`)를 함께 기록 |
+| `external` | 파일을 직접 고친 변경. 다음 cg 실행 때 감지되며 `observed_by`를 기록 |
+
+```bash
+cg context --brief                 # 한 화면 요약 (세션 시작 hook이 주입하는 내용)
+cg context                         # 모듈 표, 커스텀, pipeline 연산, 스킬, 최근 실행, 변경 이력, 경고
+cg context module <id>             # 타입 필수 필드, 관계, 의존성, eject drift, 해당 모듈 이력
+cg context pipeline <name>         # 연산, adoption 필요 여부, 최근 실행, 이력
+cg context history [--limit N]
+cg context --json                  # 구조화 데이터
+cg context hook                    # Claude Code SessionStart hook 설치 (init은 기본으로 설치, --no-hook으로 생략)
+```
+
+- eject한 모듈은 원본 파일 hash를 저장해 두고, 로컬에서 수정·추가·삭제한 파일과 이후 upstream 변경 여부를 보고합니다.
+- 에이전트에 전달하는 경로: SessionStart hook(자동 주입), 공유 스킬 `cg-context`(init 때 기본 링크), AGENTS.md 규칙
+
 ## 워크스페이스 명령
 
 ```bash

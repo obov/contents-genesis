@@ -13,6 +13,12 @@ contents-genesis 기반 프로젝트. 모듈·공유 스킬은 `cg` CLI로 관�
 - `.agents/skills/`: 프로젝트 전용 스킬 + 공유 스킬 symlink (`.claude/skills`가 같은 곳을 가리킴)
 - `workspace/`: 실제 자료. Git 제외
 
+## 구성 파악
+
+- 현재 모듈·pipeline·스킬·커스텀 내역·최근 변경: `bun cg context` (Claude Code는 세션 시작 시 brief 자동 주입)
+- 특정 대상: `bun cg context module <id>` / `bun cg context pipeline <name>` / `bun cg context history`
+- 구성 변경 이력은 `.cg/history.jsonl`에 자동 기록 (cg 명령과 직접 편집 모두). `.cg/`는 Git에 포함
+
 ## 모듈 관리
 
 - 목록: `bun cg module list`

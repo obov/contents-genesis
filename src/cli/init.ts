@@ -76,7 +76,8 @@ export function initProject(dir: string, options: InitOptions) {
   const modules = withDependencies(options.modules ?? builtinModules()).map(
     builtinSpec,
   );
-  const skills = options.skills ?? [];
+  // cg-context is how agents learn the project layout; link it by default.
+  const skills = [...new Set(["cg-context", ...(options.skills ?? [])])];
   for (const skill of skills)
     if (!availableSkills().includes(skill))
       throw new Error(`Unknown shared skill: ${skill}`);

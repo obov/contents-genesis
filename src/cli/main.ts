@@ -24,6 +24,16 @@ import {
   removePipeline,
 } from "./pipelines.ts";
 import { verifyWorkspace, workspaceUsage } from "./workspace.ts";
+import {
+  inventory,
+  renderBrief,
+  renderFull,
+  renderHistory,
+  renderModule,
+  renderPipeline,
+} from "./context.ts";
+import { installHook } from "./hook.ts";
+import { observe, readHistory, recordCommand, type State } from "./tracking.ts";
 
 const HELP = `contents-genesis ${PACKAGE_VERSION}
 
@@ -48,6 +58,11 @@ Production pipelines (영상·음성·블로그 등 산출 방식)
 
 Skills
   cg skill list | add <name> | remove <name> | link
+
+Agent context (구성·커스텀·변경 이력 자동 추적)
+  cg context [--brief|--json]      모듈·pipeline·스킬·커스텀·drift·최근 실행·경고
+  cg context module <id> | pipeline <name> | history [--limit N]
+  cg context hook                  Claude Code 세션 시작 시 brief 자동 주입
 
 Workspace
   cg doctor | modules | write FILE | show ID [REV] | alias NAMESPACE VALUE
@@ -107,8 +122,9 @@ async function main(): Promise<unknown> {
         skills = list(option("--skills")),
         source = option("--source"),
         renderer = !flag("--no-renderer"),
-        install = !flag("--no-install");
-      return initProject(args[1] ?? projectOption ?? ".", {
+        install = !flag("--no-install"),
+        hook = !flag("--no-hook");
+      const result = initProject(args[1] ?? projectOption ?? ".", {
         id,
         modules,
         skills,
@@ -116,6 +132,9 @@ async function main(): Promise<unknown> {
         renderer,
         install,
       });
+      if (hook) installHook(result.project);
+      observe(result.project);
+      return { ...result, agent_hook: hook };
     }
 
     case "module": {
@@ -143,6 +162,40 @@ async function main(): Promise<unknown> {
       if (sub === "default")
         return defaultPipeline(root(), required(1, "name"));
       throw new Error(`Unknown pipeline command: ${sub}`);
+    }
+
+    case "context": {
+      const project = root(),
+        json = flag("--json"),
+        brief = flag("--brief"),
+        limit = Number(option("--limit") ?? 20),
+        [, scope, name] = args;
+      if (scope === "hook") return installHook(project);
+      if (scope === "history")
+        return json
+          ? readHistory(project).slice(-limit)
+          : renderHistory(readHistory(project), limit);
+      const inv = await inventory(project, scope ? 1000 : brief ? 3 : 10);
+      if (json)
+        return scope === "module"
+          ? inv.modules.find((m) => m.id === name)
+          : scope === "pipeline"
+            ? inv.pipelines.find((p) => p.name === name)
+            : inv;
+      if (scope === "module")
+        return renderModule(
+          inv,
+          name ?? required(1, "module id"),
+          readHistory(project),
+        );
+      if (scope === "pipeline")
+        return renderPipeline(
+          inv,
+          name ?? required(1, "pipeline name"),
+          readHistory(project),
+        );
+      if (scope) throw new Error(`Unknown context scope: ${scope}`);
+      return brief ? renderBrief(inv) : renderFull(inv);
     }
 
     case "skill": {
@@ -237,8 +290,35 @@ async function main(): Promise<unknown> {
   }
 }
 
+// Configuration tracking: note external edits before, cg-made changes after.
+const TRACKED_SKIP = new Set([
+  undefined,
+  "help",
+  "--help",
+  "-h",
+  "version",
+  "--version",
+  "init",
+]);
+let tracked: { root: string; before: State } | undefined;
+if (!TRACKED_SKIP.has(args[0]))
+  try {
+    const at = args.indexOf("--project"),
+      root = findProjectRoot(at >= 0 && args[at + 1] ? args[at + 1]! : ".");
+    tracked = { root, before: observe(root) };
+  } catch {
+    // Not in a project or unreadable config: commands report their own errors.
+  }
+const commandLine = args
+  .filter((a, i) => a !== "--project" && args[i - 1] !== "--project")
+  .join(" ");
+
 try {
   const result = await main();
+  if (tracked)
+    try {
+      recordCommand(tracked.root, tracked.before, commandLine);
+    } catch {}
   if (result !== undefined)
     console.log(typeof result === "string" ? result : json(result).trimEnd());
 } catch (error) {

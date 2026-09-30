@@ -25,6 +25,7 @@ import {
   updateProject,
 } from "./project.ts";
 import { runBun } from "./process.ts";
+import { fileHashes } from "./tracking.ts";
 
 const ID = /^[a-z][a-z0-9_]*$/;
 
@@ -154,6 +155,7 @@ export function ejectModule(root: string, id: string) {
     target = resolve(root, local);
   if (existsSync(target)) throw new Error(`Already exists: ${local}`);
   cpSync(builtinDir(id), target, { recursive: true });
+  // Original file hashes let `cg context` report local edits and upstream drift.
   writeFileSync(
     resolve(target, "EJECTED.json"),
     json({
@@ -161,6 +163,7 @@ export function ejectModule(root: string, id: string) {
       contents_genesis_version: PACKAGE_VERSION,
       module_version: builtinManifest(id).version,
       ejected_at: new Date().toISOString(),
+      original_files: fileHashes(builtinDir(id)),
     }),
   );
   updateProject(root, (c) => {
