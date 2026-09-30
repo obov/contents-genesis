@@ -1,0 +1,16 @@
+{
+  "type": "object",
+  "properties": {
+    "source_type": {
+      "type": "string"
+    },
+    "fields": {
+      "type": "object"
+    }
+  },
+  "required": [
+    "source_type",
+    "fields"
+  ],
+  "additionalProperties": true
+}

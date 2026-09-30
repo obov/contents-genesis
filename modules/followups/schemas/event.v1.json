@@ -1,0 +1,14 @@
+{
+  "type": "object",
+  "properties": {
+    "event_kind": {
+      "type": "string",
+      "minLength": 1
+    },
+    "timing": {
+      "type": "object"
+    }
+  },
+  "required": ["event_kind", "timing"],
+  "additionalProperties": true
+}

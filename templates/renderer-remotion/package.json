@@ -1,0 +1,23 @@
+{
+  "name": "{{id}}-renderer",
+  "private": true,
+  "version": "0.1.0",
+  "type": "module",
+  "scripts": {
+    "dev": "remotion studio src/index.ts --port=3100 --public-dir=../workspace/stores/production/inputs/public",
+    "check": "tsc --noEmit",
+    "build": "node scripts/build-short.mjs",
+    "voice": "node scripts/typecast-short.mjs"
+  },
+  "dependencies": {
+    "@remotion/cli": "4.0.529",
+    "js-yaml": "4.3.2",
+    "react": "19.2.3",
+    "react-dom": "19.2.3",
+    "remotion": "4.0.529"
+  },
+  "devDependencies": {
+    "@types/react": "19.2.7",
+    "typescript": "5.9.3"
+  }
+}

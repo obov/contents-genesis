@@ -1,0 +1,4 @@
+interface:
+  display_name: "YouTube Studio Analyst"
+  short_description: "Studio 에이전트와 대화하고 실제 분석 지표를 대조해 개선 실험을 기록"
+  default_prompt: "$youtube-studio-analyst로 Studio 에이전트와 대화해 채널 성과를 확인하고 개선 기록을 갱신해줘."

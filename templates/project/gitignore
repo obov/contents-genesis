@@ -1,0 +1,8 @@
+node_modules/
+workspace/
+secrets/
+.env
+.env.*
+.DS_Store
+__pycache__/
+renderer/out/

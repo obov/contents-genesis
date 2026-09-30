@@ -1,0 +1,63 @@
+{
+  "manifest_version": "1.0.0",
+  "id": "followups",
+  "version": "1.0.0",
+  "requires_core": "1.x",
+  "requires_modules": {
+    "sources": "1.x",
+    "production": "1.x",
+    "publication": "1.x"
+  },
+  "types": [
+    {
+      "name": "followups.event",
+      "version": "1.0.0",
+      "schema": "schemas/event.v1.json"
+    },
+    {
+      "name": "followups.checkpoint",
+      "version": "1.0.0",
+      "schema": "schemas/checkpoint.v1.json"
+    }
+  ],
+  "relations": [
+    {
+      "name": "followups.part_of",
+      "version": "1.0.0",
+      "schema": "schemas/part_of.v1.json",
+      "from_types": ["followups.checkpoint"],
+      "to_types": ["followups.event"]
+    },
+    {
+      "name": "followups.raises",
+      "version": "1.0.0",
+      "schema": "schemas/raises.v1.json",
+      "from_types": ["production.script", "publication.item"],
+      "to_types": ["followups.checkpoint"],
+      "pin": "both"
+    },
+    {
+      "name": "followups.result",
+      "version": "1.0.0",
+      "schema": "schemas/result.v1.json",
+      "from_types": ["sources.document"],
+      "to_types": ["followups.checkpoint"],
+      "pin": "both"
+    },
+    {
+      "name": "followups.answers",
+      "version": "1.0.0",
+      "schema": "schemas/answers.v1.json",
+      "from_types": ["publication.item"],
+      "to_types": ["followups.checkpoint"],
+      "pin": "both"
+    },
+    {
+      "name": "followups.continues",
+      "version": "1.0.0",
+      "schema": "schemas/continues.v1.json",
+      "from_types": ["followups.event"],
+      "to_types": ["followups.event"]
+    }
+  ]
+}

@@ -1,0 +1,11 @@
+{
+  "type": "object",
+  "properties": {
+    "basis": {
+      "type": "string"
+    }
+  },
+  "required": [
+    "basis"
+  ]
+}

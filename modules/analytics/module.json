@@ -1,0 +1,57 @@
+{
+  "manifest_version": "1.0.0",
+  "id": "analytics",
+  "version": "1.0.0",
+  "requires_core": "1.x",
+  "requires_modules": {
+    "sources": "1.x",
+    "publication": "1.x"
+  },
+  "types": [
+    {
+      "name": "analytics.observation",
+      "version": "1.0.0",
+      "schema": "schemas/observation.v1.json"
+    },
+    {
+      "name": "analytics.dialogue",
+      "version": "1.0.0",
+      "schema": "schemas/dialogue.v1.json"
+    },
+    {
+      "name": "analytics.analysis",
+      "version": "1.0.0",
+      "schema": "schemas/analysis.v1.json"
+    }
+  ],
+  "relations": [
+    {
+      "name": "analytics.observes",
+      "version": "1.0.0",
+      "schema": "schemas/observes.v1.json",
+      "from_types": [
+        "analytics.observation"
+      ],
+      "to_types": [
+        "publication.item"
+      ],
+      "pin": "both"
+    },
+    {
+      "name": "analytics.derived_from",
+      "version": "1.0.0",
+      "schema": "schemas/derived_from.v1.json",
+      "from_types": [
+        "analytics.observation",
+        "analytics.dialogue",
+        "analytics.analysis"
+      ],
+      "to_types": [
+        "sources.document",
+        "analytics.observation",
+        "analytics.dialogue"
+      ],
+      "pin": "both"
+    }
+  ]
+}

@@ -1,0 +1,50 @@
+{
+  "manifest_version": "1.0.0",
+  "id": "sources",
+  "version": "1.0.0",
+  "requires_core": "1.x",
+  "requires_modules": {},
+  "types": [
+    {
+      "name": "sources.document",
+      "version": "1.0.0",
+      "schema": "schemas/document.v1.json"
+    },
+    {
+      "name": "sources.dataset",
+      "version": "1.0.0",
+      "schema": "schemas/dataset.v1.json"
+    },
+    {
+      "name": "sources.series",
+      "version": "1.0.0",
+      "schema": "schemas/series.v1.json"
+    }
+  ],
+  "relations": [
+    {
+      "name": "sources.references",
+      "version": "1.0.0",
+      "schema": "schemas/references.v1.json",
+      "from_types": [
+        "sources.document"
+      ],
+      "to_types": [
+        "sources.document"
+      ],
+      "pin": "both"
+    },
+    {
+      "name": "sources.has_source",
+      "version": "1.0.0",
+      "schema": "schemas/has_source.v1.json",
+      "from_types": [
+        "sources.dataset"
+      ],
+      "to_types": [
+        "sources.document"
+      ],
+      "pin": "both"
+    }
+  ]
+}

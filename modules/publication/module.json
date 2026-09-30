@@ -1,0 +1,46 @@
+{
+  "manifest_version": "1.0.0",
+  "id": "publication",
+  "version": "1.0.0",
+  "requires_core": "1.x",
+  "requires_modules": {
+    "production": "1.x"
+  },
+  "types": [
+    {
+      "name": "publication.item",
+      "version": "1.0.0",
+      "schema": "schemas/item.v1.json"
+    },
+    {
+      "name": "publication.item",
+      "version": "1.1.0",
+      "schema": "schemas/item.v1.1.json"
+    }
+  ],
+  "relations": [
+    {
+      "name": "publication.publishes_project",
+      "version": "1.0.0",
+      "schema": "schemas/publishes_project.v1.json",
+      "from_types": [
+        "publication.item"
+      ],
+      "to_types": [
+        "production.project"
+      ]
+    },
+    {
+      "name": "publication.uploaded_artifact",
+      "version": "1.0.0",
+      "schema": "schemas/uploaded_artifact.v1.json",
+      "from_types": [
+        "publication.item"
+      ],
+      "to_types": [
+        "production.artifact"
+      ],
+      "pin": "both"
+    }
+  ]
+}

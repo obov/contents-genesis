@@ -1,0 +1,15 @@
+{
+  "type": "object",
+  "properties": {
+    "artifact_kind": {
+      "type": "string",
+      "pattern": "^[a-z][a-z0-9_-]*$"
+    },
+    "pipeline": { "type": "string", "minLength": 1 },
+    "renderer": { "type": "string", "minLength": 1 },
+    "run_id": { "type": "string" },
+    "verification_only": { "type": "boolean" }
+  },
+  "required": ["artifact_kind"],
+  "additionalProperties": true
+}

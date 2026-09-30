@@ -1,0 +1,10 @@
+{
+  "type": "object",
+  "properties": {
+    "match": {
+      "enum": ["unknown", "confirmed"]
+    }
+  },
+  "required": ["match"],
+  "additionalProperties": true
+}

@@ -1,0 +1,24 @@
+{
+  "type": "object",
+  "properties": {
+    "legacy_id": {
+      "type": "string"
+    },
+    "treatment_state": {
+      "enum": [
+        "proposed",
+        "produced",
+        "published"
+      ]
+    },
+    "treatment_proposal": {
+      "type": "string"
+    }
+  },
+  "required": [
+    "legacy_id",
+    "treatment_state",
+    "treatment_proposal"
+  ],
+  "additionalProperties": true
+}

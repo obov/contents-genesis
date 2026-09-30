@@ -1,0 +1,71 @@
+{
+  "type": "object",
+  "properties": {
+    "platform": {
+      "type": "string",
+      "minLength": 1
+    },
+    "external_id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "status": {
+      "enum": [
+        "unknown",
+        "scheduled",
+        "published",
+        "private",
+        "removed"
+      ]
+    },
+    "published_at": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "observed_at": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "uploaded_artifact_match": {
+      "enum": [
+        "unknown",
+        "confirmed"
+      ]
+    }
+  },
+  "required": [
+    "platform",
+    "external_id",
+    "status",
+    "observed_at",
+    "uploaded_artifact_match"
+  ],
+  "additionalProperties": true,
+  "if": {
+    "properties": {
+      "status": {
+        "const": "published"
+      }
+    },
+    "required": [
+      "status"
+    ]
+  },
+  "then": {
+    "required": [
+      "published_at"
+    ],
+    "properties": {
+      "published_at": {
+        "type": [
+          "string",
+          "null"
+        ]
+      }
+    }
+  }
+}

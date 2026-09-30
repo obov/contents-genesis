@@ -1,0 +1,11 @@
+{
+  "name": "contents-genesis",
+  "owner": { "name": "obov" },
+  "plugins": [
+    {
+      "name": "contents-genesis",
+      "source": "./",
+      "description": "Shared content-production skills for contents-genesis projects."
+    }
+  ]
+}

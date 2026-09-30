@@ -1,0 +1,11 @@
+{
+  "type": "object",
+  "properties": {
+    "question": {
+      "type": "string",
+      "minLength": 1
+    }
+  },
+  "required": ["question"],
+  "additionalProperties": true
+}

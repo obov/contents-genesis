@@ -1,0 +1,94 @@
+{
+  "manifest_version": "1.0.0",
+  "id": "production",
+  "version": "1.1.0",
+  "requires_core": "1.x",
+  "requires_modules": {
+    "research": "1.x",
+    "sources": "1.x"
+  },
+  "types": [
+    {
+      "name": "production.project",
+      "version": "1.0.0",
+      "schema": "schemas/project.v1.json"
+    },
+    {
+      "name": "production.script",
+      "version": "1.0.0",
+      "schema": "schemas/script.v1.json"
+    },
+    {
+      "name": "production.artifact",
+      "version": "1.0.0",
+      "schema": "schemas/artifact.v1.json"
+    },
+    {
+      "name": "production.artifact",
+      "version": "1.1.0",
+      "schema": "schemas/artifact.v1.1.json"
+    }
+  ],
+  "relations": [
+    {
+      "name": "production.uses_claim",
+      "version": "1.0.0",
+      "schema": "schemas/uses_claim.v1.json",
+      "from_types": [
+        "production.script"
+      ],
+      "to_types": [
+        "research.claim"
+      ],
+      "pin": "both"
+    },
+    {
+      "name": "production.belongs_to",
+      "version": "1.0.0",
+      "schema": "schemas/belongs_to.v1.json",
+      "from_types": [
+        "production.script",
+        "production.artifact"
+      ],
+      "to_types": [
+        "production.project"
+      ]
+    },
+    {
+      "name": "production.rendered_from",
+      "version": "1.0.0",
+      "schema": "schemas/rendered_from.v1.json",
+      "from_types": [
+        "production.artifact"
+      ],
+      "to_types": [
+        "production.script"
+      ],
+      "pin": "both"
+    },
+    {
+      "name": "production.generated_from",
+      "version": "1.0.0",
+      "schema": "schemas/generated_from.v1.json",
+      "from_types": [
+        "production.artifact"
+      ],
+      "to_types": [
+        "production.script"
+      ],
+      "pin": "both"
+    },
+    {
+      "name": "production.has_material",
+      "version": "1.0.0",
+      "schema": "schemas/has_material.v1.json",
+      "from_types": [
+        "production.project"
+      ],
+      "to_types": [
+        "sources.document"
+      ],
+      "pin": "both"
+    }
+  ]
+}

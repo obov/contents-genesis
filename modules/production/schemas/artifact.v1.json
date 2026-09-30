@@ -1,0 +1,22 @@
+{
+  "type": "object",
+  "properties": {
+    "artifact_kind": {
+      "enum": [
+        "video",
+        "audio",
+        "thumbnail",
+        "captions",
+        "metadata"
+      ]
+    },
+    "renderer": {
+      "type": "string",
+      "minLength": 1
+    }
+  },
+  "required": [
+    "artifact_kind"
+  ],
+  "additionalProperties": true
+}

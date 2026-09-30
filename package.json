@@ -1,0 +1,70 @@
+{
+  "name": "contents-genesis",
+  "version": "0.1.0",
+  "description": "Pluggable content-production workspace: core record store, builtin modules, shared agent skills and the cg CLI.",
+  "keywords": [
+    "content",
+    "youtube",
+    "remotion",
+    "cli",
+    "agent-skills",
+    "claude-code",
+    "bun",
+    "workspace"
+  ],
+  "license": "MIT",
+  "author": "obov",
+  "homepage": "https://github.com/obov/contents-genesis#readme",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/obov/contents-genesis.git"
+  },
+  "bugs": {
+    "url": "https://github.com/obov/contents-genesis/issues"
+  },
+  "type": "module",
+  "packageManager": "bun@1.4.2",
+  "bin": {
+    "cg": "bin/cg.js",
+    "contents-genesis": "bin/cg.js"
+  },
+  "exports": {
+    "./core": "./core/index.ts",
+    "./runtime": "./runtime/index.ts",
+    "./package.json": "./package.json",
+    "./production": "./modules/production/src/pipeline.ts"
+  },
+  "files": [
+    "bin",
+    "core",
+    "runtime",
+    "modules",
+    "skills",
+    "templates",
+    "src",
+    ".claude-plugin"
+  ],
+  "engines": {
+    "bun": ">=1.3"
+  },
+  "scripts": {
+    "cg": "bun src/cli/main.ts",
+    "check": "tsc --noEmit && bun test ./tests",
+    "test": "bun test ./tests",
+    "format": "prettier --write core runtime modules src tests bin",
+    "prepublishOnly": "bun run check"
+  },
+  "dependencies": {
+    "ajv": "8.17.1",
+    "semver": "7.7.2"
+  },
+  "devDependencies": {
+    "@types/bun": "1.3.10",
+    "@types/semver": "7.7.0",
+    "prettier": "3.6.2",
+    "typescript": "5.9.3"
+  },
+  "publishConfig": {
+    "access": "public"
+  }
+}

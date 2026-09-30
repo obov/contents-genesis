@@ -1,0 +1,16 @@
+{
+  "type": "object",
+  "properties": {
+    "indicator_id": {
+      "type": "string"
+    },
+    "definition": {
+      "type": "object"
+    }
+  },
+  "required": [
+    "indicator_id",
+    "definition"
+  ],
+  "additionalProperties": true
+}

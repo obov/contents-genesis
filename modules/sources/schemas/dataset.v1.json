@@ -1,0 +1,12 @@
+{
+  "type": "object",
+  "properties": {
+    "snapshot_counts": {
+      "type": "object"
+    }
+  },
+  "required": [
+    "snapshot_counts"
+  ],
+  "additionalProperties": true
+}

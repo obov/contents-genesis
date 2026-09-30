@@ -1,0 +1,10 @@
+{
+  "type": "object",
+  "properties": {
+    "production_status": {
+      "enum": ["planned", "in_progress", "complete"]
+    }
+  },
+  "required": ["production_status"],
+  "additionalProperties": true
+}

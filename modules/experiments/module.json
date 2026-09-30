@@ -1,0 +1,62 @@
+{
+  "manifest_version": "1.0.0",
+  "id": "experiments",
+  "version": "1.0.0",
+  "requires_core": "1.x",
+  "requires_modules": {
+    "publication": "1.x",
+    "sources": "1.x",
+    "analytics": "1.x"
+  },
+  "types": [
+    {
+      "name": "experiments.plan",
+      "version": "1.0.0",
+      "schema": "schemas/plan.v1.json"
+    },
+    {
+      "name": "experiments.pair",
+      "version": "1.0.0",
+      "schema": "schemas/pair.v1.json"
+    }
+  ],
+  "relations": [
+    {
+      "name": "experiments.part_of",
+      "version": "1.0.0",
+      "schema": "schemas/part_of.v1.json",
+      "from_types": [
+        "experiments.pair"
+      ],
+      "to_types": [
+        "experiments.plan"
+      ],
+      "pin": "both"
+    },
+    {
+      "name": "experiments.control",
+      "version": "1.0.0",
+      "schema": "schemas/control.v1.json",
+      "from_types": [
+        "experiments.pair"
+      ],
+      "to_types": [
+        "publication.item"
+      ],
+      "pin": "both"
+    },
+    {
+      "name": "experiments.based_on",
+      "version": "1.0.0",
+      "schema": "schemas/based_on.v1.json",
+      "from_types": [
+        "experiments.plan"
+      ],
+      "to_types": [
+        "analytics.analysis",
+        "sources.document"
+      ],
+      "pin": "both"
+    }
+  ]
+}

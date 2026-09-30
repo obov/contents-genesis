@@ -1,0 +1,20 @@
+{
+  "type": "object",
+  "properties": {
+    "status": {
+      "enum": [
+        "planned",
+        "active",
+        "completed"
+      ]
+    },
+    "legacy_id": {
+      "type": "string"
+    }
+  },
+  "required": [
+    "status",
+    "legacy_id"
+  ],
+  "additionalProperties": true
+}

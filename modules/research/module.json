@@ -1,0 +1,58 @@
+{
+  "manifest_version": "1.0.0",
+  "id": "research",
+  "version": "1.0.0",
+  "requires_core": "1.x",
+  "requires_modules": {
+    "sources": "1.x"
+  },
+  "types": [
+    {
+      "name": "research.note",
+      "version": "1.0.0",
+      "schema": "schemas/note.v1.json"
+    },
+    {
+      "name": "research.claim",
+      "version": "1.0.0",
+      "schema": "schemas/claim.v1.json"
+    },
+    {
+      "name": "research.question",
+      "version": "1.0.0",
+      "schema": "schemas/question.v1.json"
+    },
+    {
+      "name": "research.calculation",
+      "version": "1.0.0",
+      "schema": "schemas/calculation.v1.json"
+    }
+  ],
+  "relations": [
+    {
+      "name": "research.supported_by",
+      "version": "1.0.0",
+      "schema": "schemas/supported_by.v1.json",
+      "from_types": [
+        "research.claim",
+        "research.note"
+      ],
+      "to_types": [
+        "sources.document"
+      ],
+      "pin": "both"
+    },
+    {
+      "name": "research.calculated_from",
+      "version": "1.0.0",
+      "schema": "schemas/calculated_from.v1.json",
+      "from_types": [
+        "research.calculation"
+      ],
+      "to_types": [
+        "sources.dataset"
+      ],
+      "pin": "both"
+    }
+  ]
+}

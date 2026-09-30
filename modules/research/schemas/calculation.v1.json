@@ -1,0 +1,12 @@
+{
+  "type": "object",
+  "properties": {
+    "legacy_path": {
+      "type": "string"
+    }
+  },
+  "required": [
+    "legacy_path"
+  ],
+  "additionalProperties": true
+}

@@ -1,0 +1,10 @@
+{
+  "type": "object",
+  "properties": {
+    "result_status": {
+      "enum": ["confirmed", "not_disclosed"]
+    }
+  },
+  "required": ["result_status"],
+  "additionalProperties": true
+}

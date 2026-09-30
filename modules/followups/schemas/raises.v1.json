@@ -1,0 +1,11 @@
+{
+  "type": "object",
+  "properties": {
+    "quote": {
+      "type": "string",
+      "minLength": 1
+    }
+  },
+  "required": ["quote"],
+  "additionalProperties": true
+}

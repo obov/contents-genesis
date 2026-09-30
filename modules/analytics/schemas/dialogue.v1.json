@@ -1,0 +1,12 @@
+{
+  "type": "object",
+  "properties": {
+    "source_type": {
+      "const": "studio_agent"
+    }
+  },
+  "required": [
+    "source_type"
+  ],
+  "additionalProperties": true
+}

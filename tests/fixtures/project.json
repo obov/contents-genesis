@@ -1,0 +1,21 @@
+{
+  "format_version": "1.0.0",
+  "id": "fixture",
+  "modules": [
+    "modules/sources",
+    "modules/research",
+    "modules/production",
+    "modules/publication",
+    "modules/followups",
+    "modules/analytics",
+    "modules/experiments"
+  ],
+  "stores": {
+    "records": "workspace/records",
+    "objects": "workspace/objects",
+    "stores": "workspace/stores",
+    "indexes": "workspace/indexes",
+    "runs": "workspace/runs",
+    "work": "workspace/work"
+  }
+}

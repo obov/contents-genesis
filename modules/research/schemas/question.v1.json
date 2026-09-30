@@ -1,0 +1,20 @@
+{
+  "type": "object",
+  "properties": {
+    "legacy_id": {
+      "type": "string"
+    },
+    "question": {
+      "type": "string"
+    },
+    "legacy_row": {
+      "type": "string"
+    }
+  },
+  "required": [
+    "legacy_id",
+    "question",
+    "legacy_row"
+  ],
+  "additionalProperties": true
+}
