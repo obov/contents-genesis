@@ -137,7 +137,7 @@ export default definePipeline({
   expect(readFileSync(resolve(inputs, "audio/ep1.wav"), "utf8")).toBe(
     "RIFF:안녕하세요. 첫 편입니다.",
   );
-});
+}, 30_000); // CLI 프로세스 6회 실행. CI 러너에서 기본 5초 초과 사례(v0.3.0 publish)
 
 test("config-only command pipeline produces a blog post without adoption", () => {
   const { root } = project({ p1: { pipeline: "blog", title: "Hello" } });

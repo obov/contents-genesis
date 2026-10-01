@@ -1,6 +1,6 @@
 ---
 name: kit-youtube-upload
-description: "[재사용] ego-browser로 YouTube Studio에 영상을 업로드하고 메타데이터·공개 예약을 설정하는 키트. 업로드 전 대상 채널 대조 필수. \"유튜브 업로드\", \"영상 올려줘\", \"공개 예약\", \"초안만 설정\", \"업로드 이어서\" 요청. 성과 분석·Ask Studio 대화는 youtube-studio-analyst."
+description: "[재사용] ego-browser로 YouTube Studio에 영상을 업로드하고 메타데이터·공개 예약을 설정하는 키트. 업로드 전 대상 채널 대조 필수. \"유튜브 업로드\", \"영상 올려줘\", \"공개 예약\", \"초안만 설정\", \"업로드 이어서\", \"영상 삭제\" 요청. 성과 분석·Ask Studio 대화는 youtube-studio-analyst. 도구 scripts/upload.mjs."
 ---
 
 # YouTube Studio 업로드 (재사용 키트)
@@ -8,6 +8,17 @@ description: "[재사용] ego-browser로 YouTube Studio에 영상을 업로드�
 > 실전 검증 절차 모음. 채널별 기준(언어, 시청자층, 태그 규칙, 메타데이터 파일 위치)은 각 프로젝트의 채널 스킬에 둔다.
 > 브라우저 공통 함정은 `kit-browser-automation`을 먼저 읽는다.
 > 실행 조건: ego-browser 설치, ego-browser에서 대상 채널 Google 계정 로그인
+
+## 도구
+
+스킬 폴더의 `scripts/` (프로젝트에서는 `.agents/skills/kit-youtube-upload/scripts/`). `sh scripts/run.sh <script.mjs> '<ENV_JSON>'`.
+
+| 스크립트 | env | 결과 (OUT JSON) |
+|---|---|---|
+| `upload.mjs` | `FILE`, `CHANNEL_ID`, `TITLE`, `DESCRIPTION?`, `VISIBILITY?`(private), `MADE_FOR_KIDS?`, `OUT`, `SHOT`, `SPACE?`, `PAGE?` | 채널 대조 → 업로드 → 입력값 재확인 → 저장. `video_id`, `channel_check`, 처리 상태 |
+| `remove.mjs` | `VIDEO_ID`, `CHANNEL_ID`, `TITLE?`(대조), `OUT`, `SHOT`, `SPACE`, `PAGE?` | 영구 삭제. **되돌릴 수 없음, 사용자 요청 시에만** |
+
+- 채널 불일치 시 `task.handOff()` 후 중단. 공개 예약·썸네일은 미지원 (아래 절차대로 직접 조작)
 
 사용자가 업로드·설정·게시를 요청했을 때만 실행한다. 기존 업로드를 이어가는 경우 새 영상을 중복 등록하지 않고, 보존한 영상 ID와 작업 화면부터 확인한다.
 
@@ -21,7 +32,7 @@ description: "[재사용] ego-browser로 YouTube Studio에 영상을 업로드�
 4. 사용자 재개 후 2번부터 다시 대조. 일치 확인 전 업로드 창 열기 금지
 5. 대조 결과(채널 ID, 채널명, 시각)를 업로드 기록에 포함
 
-> URL 기반 채널 ID 판정은 이 키트 작성 시점(2026-10-01) 미검증. 첫 실행에서 확인 후 이 절을 갱신한다.
+> 2026-10-01 검증: 로그인 상태에서 `studio.youtube.com` → `/channel/<UC…>` 리다이렉트, 채널명 `#entity-name`
 
 ## 1. 입력값
 
@@ -38,6 +49,17 @@ description: "[재사용] ego-browser로 YouTube Studio에 영상을 업로드�
 5. 유료 프로모션, AI·합성 콘텐츠 표시는 실제 제작 내용과 화면 질문을 읽고 설정. 다른 영상의 답을 그대로 복사 금지
 6. 동영상 요소·검토 단계 확인. 구워 넣은 자막이 있으면 별도 자막 트랙 자동 추가 금지
 7. '설정만', '끝까지 올리지 말라' 요청이면 공개·예약 확정 금지. 비공개 초안 자동 저장 상태 확인, 최종 버튼 누르기 전 화면을 남기고 실제 저장 상태와 미완료 항목을 구분해 보고
+
+## 화면 요소 (2026-10-01 검증)
+
+- 업로드 창: `button[aria-label="동영상 업로드"]` → `input[name="Filedata"]`에 `setInputFiles`
+- 제목 `#title-textarea #textbox`, 설명 `#description-textarea #textbox` (contenteditable: 클릭 → 전체 선택 → 삭제 → `insertText`, 줄바꿈 Shift+Enter)
+- 시청자층 `tp-yt-paper-radio-button[name="VIDEO_MADE_FOR_KIDS_NOT_MFK"]` / `..._MFK`
+- 변경·합성 콘텐츠 질문 `VIDEO_HAS_ALTERED_CONTENT_NO`: 채널에 따라 미표시
+- `#next-button` 3회 → 공개 상태 `tp-yt-paper-radio-button[name="PRIVATE|UNLISTED|PUBLIC"]` → `#done-button`
+- 영상 ID: 업로드 창의 `youtu.be/<id>` 링크 (파일 투입 직후 표시)
+- 처리 중 편집 화면 공개 상태 "대기 중" → 처리 후 지정 상태
+- 삭제: 편집 화면 상단 옵션(⋮, `aria-label="옵션"` 중 보이는 첫 번째) → "삭제" → 동의 체크 → "영구 삭제". 삭제 후 편집 URL은 "오류가 발생했습니다", 콘텐츠 목록에서 사라짐 확인
 
 ## 상태 구분
 
