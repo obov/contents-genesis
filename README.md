@@ -137,7 +137,7 @@ cg context hook                    # Claude Code SessionStart hook 설치 (init�
 ```
 
 - eject한 모듈은 원본 파일 hash를 저장해 두고, 로컬에서 수정·추가·삭제한 파일과 이후 upstream 변경 여부를 보고합니다.
-- 에이전트에 전달하는 경로: SessionStart hook(자동 주입), 공유 스킬 `cg-context`(init 때 기본 링크), AGENTS.md 규칙
+- 에이전트에 전달하는 경로: SessionStart hook(자동 주입), 공유 스킬 `cg-context`(init 때 기본 링크, cg 조회·갱신·배포 분기), AGENTS.md 규칙
 
 ## 워크스페이스 명령
 
