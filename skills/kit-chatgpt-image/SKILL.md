@@ -1,12 +1,25 @@
 ---
 name: kit-chatgpt-image
-description: "[재사용] ego-browser로 chatgpt.com에서 이미지를 생성·저장하는 키트. 인물(페르소나) 일관성 유지, 제품 참조 합성, 프로필·커버·본문 이미지. \"사진 만들어줘\", \"이미지 생성\", \"프로필이랑 제품 합성\", \"커버 이미지\" 요청."
+description: "[재사용] ego-browser로 chatgpt.com에서 이미지를 생성·저장하는 키트. 인물(페르소나) 일관성 유지, 제품 참조 합성, 프로필·커버·본문 이미지. \"사진 만들어줘\", \"이미지 생성\", \"프로필이랑 제품 합성\", \"커버 이미지\" 요청. 도구 scripts/generate-image.sh."
 ---
 
 # ChatGPT 이미지 생성 (재사용 키트)
 
-> 실전 검증 패턴 모음. 프로젝트별 경로(글 폴더, 페르소나 파일, 생성 스크립트)는 각 프로젝트의 채널 스킬에 둔다.
+> 실전 검증 패턴 모음. 프로젝트별 경로(글 폴더, 페르소나 파일)는 각 프로젝트의 채널 스킬에 둔다.
 > 브라우저 공통 함정은 `kit-browser-automation`을 먼저 읽는다.
+> 실행 조건: ego-browser 설치, ego-browser에서 chatgpt.com 로그인. 스킬 설치만으로는 동작하지 않음
+
+## 도구
+
+스킬 폴더의 `scripts/` (프로젝트에서는 `.agents/skills/kit-chatgpt-image/scripts/`). 경로는 모두 절대 경로.
+
+| 도구 | 용도 |
+|---|---|
+| `sh scripts/generate-image.sh SPACE OUT_ABS_PNG "프롬프트" [첨부 절대경로...]` | 현재 대화에 이어서 1장 생성·저장. `NEW_CHAT=1`이면 새 대화 |
+| `sh scripts/save-last-image.sh SPACE OUT_ABS_PNG` | 생성 대기 초과 후 화면의 마지막 생성 이미지 저장 |
+
+- `SPACE`: ego-browser TaskSpace 번호 (작업당 1개, 생성·재사용은 ego-browser 스킬 참고)
+- 출력: `{ out, type, size, chat }`. `chat`(대화 URL)은 manifest에 기록
 
 ## 원칙
 
@@ -36,20 +49,24 @@ description: "[재사용] ego-browser로 chatgpt.com에서 이미지를 생성·
 - 한 작업 안에서 같은 A·E 반복 금지, 정면(A1)은 최대 1장
 - 결과물 manifest에 조합 코드 기록 → 검수 시 코드대로 나왔는지 대조
 
-## 화면 요소 (2026-09 기준)
+## 화면 요소 (2026-10-01 검증, `scripts/generate-image.mjs` 기준)
 
-- 입력창 `textarea[name="prompt"]`, 첨부 `button[aria-label="파일 등 추가"]`, 전송 `button[aria-label="메시지 보내기"]`
+- 입력창: contenteditable(ProseMirror) → 클릭 후 `keyboard.insertText`
+- 첨부: `input[type=file][accept="image/*"]`에 `setInputFiles`
+- 전송: 버튼 위치가 입력 길이에 따라 이동 → Enter 키
+- 생성 이미지: alt "생성된 이미지 N"의 `blob:` URL
+- 긴 대화는 이전 이미지가 DOM에서 내려감(최근 5개 유지) → 개수 대신 새 src 등장으로 완료 판정
 - 로그아웃 상태에서는 이미지 생성·파일 업로드 불가
 
 ## 절차
 
-1. 새 대화 → 첨부 버튼으로 업로드 (`page.waitForFileChooser()` 후 `chooser.setFiles([...절대경로])`)
-2. 프롬프트 입력·전송. 완료 판정: 이미지 요소 로드 + 응답 중지 버튼 사라짐 (버튼 상태만으로 판단 금지)
-3. 저장: 생성 이미지는 `blob:` URL → 페이지 안에서 fetch → base64로 꺼내 파일 저장. 또는 다운로드 버튼 + `waitForEvent("download")`
+1. `generate-image.sh` 실행 (첫 장은 `NEW_CHAT=1` + 첨부). 완료 판정: 새 생성 이미지 등장 + 중지 버튼 사라짐 (버튼 상태만으로 판단 금지)
+2. 실패·대기 초과 시 스크린샷으로 화면 확인 → 생성이 끝났으면 `save-last-image.sh`
+3. 직접 조작 시 저장 방식: `blob:` URL → 페이지 안에서 fetch → base64로 꺼내 파일 저장
 4. 저장 파일을 열어 확인 (얼굴 일관성, 상품 외형, 손가락·글자 깨짐). 큰 이미지는 `sips -Z 560` 등으로 축소 후 확인
 5. `manifest.json`에 파일명, 프롬프트, 참조 파일, 용도 기록
 
-- 1장 약 1분. 세로 4:5 요청 시 약 1122x1402 PNG
+- 1장 약 1~2분, 16:9 등 큰 이미지는 5분 이상 (스크립트 최대 대기 10분). 세로 4:5 요청 시 약 1122x1402 PNG
 - 대기 초과 시 스크린샷으로 거절·되묻기 여부 확인
 - 스마트스토어 상품 이미지 참조: `img[alt="대표이미지"]` URL을 `Referer: https://smartstore.naver.com/` 헤더로 curl (page.fetch는 CORS 실패). 실제 형식은 JPEG
 
