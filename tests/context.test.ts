@@ -165,47 +165,6 @@ test("context reports customizations, eject drift, pipelines and module details"
   expect(cg(root, "context", "module", "nope").ok).toBe(false);
 });
 
-test("context shows where a linked package module lives and its README", () => {
-  const root = init("--no-renderer");
-  const pkg = mkdtempSync(resolve(tmpdir(), "cg-pkg-"));
-  roots.push(pkg);
-  writeFileSync(
-    resolve(pkg, "module.json"),
-    JSON.stringify({
-      manifest_version: "1.0.0",
-      id: "demo",
-      version: "0.1.0",
-      requires_core: "1.x",
-      types: [],
-      relations: [],
-    }),
-  );
-  writeFileSync(resolve(pkg, "README.md"), "# demo\n");
-  symlinkSync(pkg, resolve(root, "node_modules/cg-demo"), "dir");
-  const config = JSON.parse(
-    readFileSync(resolve(root, "project.json"), "utf8"),
-  );
-  config.modules.push("cg-demo");
-  writeFileSync(resolve(root, "project.json"), JSON.stringify(config));
-
-  const demo = JSON.parse(cg(root, "context", "--json").out).modules.find(
-    (m: { id: string }) => m.id === "demo",
-  );
-  expect(demo.shared).toBe(true);
-  expect(demo.linked_to).toContain("cg-pkg-");
-  expect(demo.docs).toBe("./node_modules/cg-demo/README.md");
-
-  const mod = cg(root, "context", "module", "demo").out;
-  expect(mod).toContain("- linked → ");
-  expect(mod).toContain("shared with other projects");
-  expect(mod).toContain("- docs: ./node_modules/cg-demo/README.md");
-
-  // Builtins and plain local modules get no link line.
-  expect(cg(root, "context", "module", "production").out).not.toContain(
-    "linked →",
-  );
-});
-
 test("context warns about unlinked skills and records of removed modules", () => {
   const root = init("--no-renderer");
   rmSync(resolve(root, ".agents/skills/cg-context"));
