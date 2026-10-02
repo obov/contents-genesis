@@ -1,8 +1,9 @@
-import { afterEach, expect, test } from "bun:test";
+import { afterAll, afterEach, expect, test } from "bun:test";
 import { spawnSync } from "node:child_process";
 import {
   existsSync,
   lstatSync,
+  mkdirSync,
   mkdtempSync,
   readFileSync,
   rmSync,
@@ -14,6 +15,10 @@ import { Catalog, draft } from "../core/catalog.ts";
 
 const main = resolve(import.meta.dir, "../src/cli/main.ts"),
   roots: string[] = [];
+// Isolate the local skill registry from the real ~/.cg/skills.
+const registry = mkdtempSync(resolve(tmpdir(), "cg-registry-"));
+process.env.CG_SKILLS_HOME = registry;
+afterAll(() => rmSync(registry, { recursive: true, force: true }));
 afterEach(() => {
   for (const root of roots.splice(0))
     rmSync(root, { recursive: true, force: true });
@@ -182,4 +187,34 @@ test("skills link, list and unlink without touching project-owned skills", () =>
     false,
   );
   expect(cg(root, "skill", "add", "no-such-skill").ok).toBe(false);
+});
+
+test("local registry: publish, add in another project, missing on link", () => {
+  const a = init(),
+    b = init();
+  mkdirSync(resolve(a, ".agents/skills/my-skill"), { recursive: true });
+  writeFileSync(resolve(a, ".agents/skills/my-skill/SKILL.md"), "# my\n");
+
+  const pub = cg(a, "skill", "publish", "my-skill");
+  expect(pub.ok).toBe(true);
+  expect(existsSync(resolve(registry, "my-skill/SKILL.md"))).toBe(true);
+  expect(lstatSync(resolve(a, ".agents/skills/my-skill")).isSymbolicLink()).toBe(true);
+  expect(project(a).skills).toContain("local:my-skill");
+  expect(cg(a, "skill", "publish", "my-skill").ok).toBe(false);
+
+  expect(json(cg(b, "skill", "list")).available_local).toEqual(["local:my-skill"]);
+  expect(cg(b, "skill", "add", "local:my-skill").ok).toBe(true);
+  // Edits in the registry are visible immediately.
+  writeFileSync(resolve(registry, "my-skill/SKILL.md"), "# edited\n");
+  expect(readFileSync(resolve(b, ".agents/skills/my-skill/SKILL.md"), "utf8")).toBe("# edited\n");
+  const list = json(cg(b, "skill", "list"));
+  expect(list.local).toEqual([{ name: "local:my-skill", linked: true }]);
+  expect(cg(b, "skill", "add", "local:nope").ok).toBe(false);
+
+  // Clone on a machine without the skill: link reports missing, check still passes.
+  rmSync(resolve(registry, "my-skill"), { recursive: true });
+  const link = json(cg(b, "skill", "link"));
+  expect(link.missing).toEqual(["local:my-skill"]);
+  expect(cg(b, "skill", "remove", "local:my-skill").ok).toBe(true);
+  expect(project(b).skills).not.toContain("local:my-skill");
 });

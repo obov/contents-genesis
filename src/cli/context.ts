@@ -12,6 +12,7 @@ import {
   readProject,
 } from "./project.ts";
 import { fileHashes, readHistory, type HistoryEntry } from "./tracking.ts";
+import { skillDirName } from "./skills.ts";
 
 /**
  * Agent-facing snapshot of how this project is assembled: which modules and
@@ -242,7 +243,9 @@ export async function inventory(
   };
   const shared = (config.skills ?? []).map((name) => ({
     name,
-    linked: isLink(name) && existsSync(resolve(skillsDir, name, "SKILL.md")),
+    linked:
+      isLink(skillDirName(name)) &&
+      existsSync(resolve(skillsDir, skillDirName(name), "SKILL.md")),
   }));
   for (const s of shared)
     if (!s.linked)

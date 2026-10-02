@@ -1,6 +1,6 @@
 ---
 name: cg-context
-description: "contents-genesis(cg) 자체에 관한 단일 스킬. 'cg' = contents-genesis (npm 패키지 contents-genesis, 원본 저장소 github.com/obov/contents-genesis, 로컬 원본 ../contents-genesis). 분기: (1) 프로젝트 구성·커스텀·변경 이력 조회 (2) cg 버전 갱신·공유 스킬 받기 (3) 원본 저장소에서 공유 스킬 추가·수정·npm 배포. \"모듈 뭐 있어\", \"pipeline 구성\", \"커스텀한 거\", \"최근 변경\", \"production 어떻게 돌려\", \"cg 받아줘\", \"cg 최신화\", \"0.4.x로 스킬 공유했어\", \"<스킬명> 받아줘\", \"cg에 스킬 추가\", \"스킬 공유해줘\", \"cg 배포\", \"npm 배포\", \"버전 올려줘\" 요청. 콘텐츠 작업 스킬(kit-*)과 별개."
+description: "contents-genesis(cg) 자체에 관한 단일 스킬. 'cg' = contents-genesis (npm 패키지 contents-genesis, 원본 저장소 github.com/obov/contents-genesis, 로컬 원본 ../contents-genesis). 분기: (1) 프로젝트 구성·커스텀·변경 이력 조회 (2) cg 버전 갱신·공유 스킬 받기 (3) 원본 저장소에서 공유 스킬 추가·수정·npm 배포 (4) 버전업 없이 이 머신의 로컬 레지스트리(~/.cg/skills)로 프로젝트 간 스킬 공유. \"모듈 뭐 있어\", \"pipeline 구성\", \"커스텀한 거\", \"최근 변경\", \"production 어떻게 돌려\", \"cg 받아줘\", \"cg 최신화\", \"0.4.x로 스킬 공유했어\", \"<스킬명> 받아줘\", \"cg에 스킬 추가\", \"스킬 공유해줘\", \"cg 배포\", \"npm 배포\", \"버전 올려줘\", \"로컬 스킬 공유\", \"프로젝트 간 스킬 공유\", \"이 스킬 다른 프로젝트에서도 쓰게\", \"local:<스킬명>\", \"skill publish\" 요청. 콘텐츠 작업 스킬(kit-*)과 별개."
 ---
 
 # cg (contents-genesis)
@@ -12,6 +12,7 @@ cg              contents-genesis. 프로젝트 기반 프레임워크 + CLI (bun
 원본 저장소      github.com/obov/contents-genesis. 로컬 ../contents-genesis (있을 때)
 cg 프로젝트      project.json 이 있는 저장소. contents-genesis 를 npm 의존성으로 사용
 공유 스킬        원본 skills/<name>. 프로젝트 .agents/skills/<name> 에 symlink
+로컬 스킬        로컬 레지스트리 ~/.cg/skills/<name> (CG_SKILLS_HOME). project.json 에 local:<name>. npm 배포 없음
 스킬 접두어      cg-* = cg 자체 · kit-* = 콘텐츠 작업 재사용 키트 · 그 외 = 프로젝트/도메인
 "0.4.x로 공유했어"  해당 버전에 새 공유 스킬·수정이 담겨 npm 배포됨 → 프로젝트에서 받기 (B2)
 ```
@@ -24,6 +25,9 @@ cg 프로젝트 (project.json)        구성 · 이력 · 실패 원인         
 cg 프로젝트                       받아줘 · 최신화 · 공유했어        B2 갱신 · 받기
 원본 저장소 (package name = contents-genesis)  스킬 추가 · 수정 · 배포   B3 원본 작업 · 배포
 cg 프로젝트에서 "cg에 올려/배포"    원본 저장소로 이동 → B3 → 다시 프로젝트에서 B2
+cg 프로젝트                       프로젝트 간 스킬 공유 (버전업 없이)  B4 로컬 레지스트리
+
+공유 경로 선택: 이 머신의 프로젝트끼리만 → B4 · 다른 사람·다른 머신·모든 cg 사용자 → B3
 ```
 
 ## B1. 구성 조회
@@ -91,6 +95,22 @@ npm view contents-genesis version      # 8. 반영 확인 → 프로젝트에서
 - push · 태그 · 배포는 공개 행위 → 계획을 보여주고 확인받은 뒤 실행
 - 로컬 `npm publish` 금지. 배포는 태그 workflow 로만 (provenance)
 - 배포된 버전 재사용 불가. 실패 후 재배포는 다음 patch 버전
+
+## B4. 로컬 레지스트리 공유 (버전업 없음, cg 프로젝트)
+
+```sh
+bun cg skill publish <name>        # 프로젝트 소유 .agents/skills/<name> → ~/.cg/skills/<name> 이동 + local:<name> 연결
+bun cg skill list                  # local(연결됨) · available_local(레지스트리에 있고 미연결) · registry(경로)
+bun cg skill add local:<name>      # 다른 프로젝트에서 연결 (project.json skills + 절대경로 symlink)
+bun cg skill remove local:<name>   # 연결 해제 (레지스트리 원본 유지)
+bun cg check                       # missing_local_skills: 이 머신 레지스트리에 없는 local 스킬
+```
+
+- 수정은 `~/.cg/skills/<name>` 에서 (연결된 모든 프로젝트 즉시 반영)
+- publish 대상: symlink 아닌 프로젝트 소유 스킬만. 레지스트리에 같은 이름이 있으면 거부 → 기존 것을 `add local:<name>` 로 쓸지 사용자 확인
+- 같은 이름의 패키지 공유 스킬이 연결돼 있으면 거부 → `skill remove <name>` 후 재시도
+- 다른 머신 클론: `cg skill link` 결과 `missing` 에 표시 (실패 아님). 레지스트리에 스킬 복사 후 `cg skill link`
+- 모든 cg 사용자에게 배포하려면 원본 `skills/<name>` 으로 옮겨 B3
 
 ## 규칙
 

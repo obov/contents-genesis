@@ -15,7 +15,13 @@ import {
 } from "./modules.ts";
 import { PACKAGE_VERSION, findProjectRoot } from "./project.ts";
 import { runBun } from "./process.ts";
-import { addSkill, linkSkills, listSkills, removeSkill } from "./skills.ts";
+import {
+  addSkill,
+  linkSkills,
+  listSkills,
+  publishSkill,
+  removeSkill,
+} from "./skills.ts";
 import {
   addPipeline,
   defaultPipeline,
@@ -58,6 +64,8 @@ Production pipelines (영상·음성·블로그 등 산출 방식)
 
 Skills
   cg skill list | add <name> | remove <name> | link
+  cg skill add local:<name>        로컬 레지스트리(~/.cg/skills, CG_SKILLS_HOME) 스킬 연결
+  cg skill publish <name>          프로젝트 스킬을 로컬 레지스트리로 이동 후 local:<name>으로 연결
 
 Agent context (구성·커스텀·변경 이력 자동 추적)
   cg context [--brief|--json]      모듈·pipeline·스킬·커스텀·drift·최근 실행·경고
@@ -204,6 +212,8 @@ async function main(): Promise<unknown> {
       if (sub === "add") return addSkill(root(), required(1, "skill name"));
       if (sub === "remove")
         return removeSkill(root(), required(1, "skill name"));
+      if (sub === "publish")
+        return publishSkill(root(), required(1, "skill name"));
       if (sub === "link") return linkSkills(root());
       throw new Error(`Unknown skill command: ${sub}`);
     }
@@ -229,6 +239,7 @@ async function main(): Promise<unknown> {
       return {
         doctor: catalog.doctor(),
         skills: skills.linked,
+        ...(skills.missing.length ? { missing_local_skills: skills.missing } : {}),
         architecture: existsSync(resolve(project, "architecture/registry.json"))
           ? checkArchitecture(project)
           : null,
