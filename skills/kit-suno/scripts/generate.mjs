@@ -2,6 +2,7 @@
 // 다운로드는 하지 않음 (월 다운로드 수 제한 → 청취 후 선택한 곡만 download.mjs로 저장).
 // 입력 env: PAGE(선택, 기본 p1), SPACE(선택, TaskSpace 번호), OUT(결과 JSON 절대 경로), SPEC(JSON: model, title, style, lyrics, settings)
 // 검증(2026-10-01, Pro 플랜):
+//   - Advanced 전환: button[role=tab] 텍스트 "Advanced" (2026-10-03 변경, 이전 aria-label="Advanced")
 //   - 모델 버튼: 텍스트가 v6 / v6-wild / v6-mini인 버튼 → menuitemradio
 //   - 스타일 textarea[maxlength=1000], 제목 input[placeholder="Song Title (Optional)"](Simple/Advanced 2개 중 보이는 것)
 //   - 가사: contenteditable[aria-label="Lyrics editor"]. 비우면 인스트루멘털
@@ -44,10 +45,19 @@ log("before", before);
 
 await page.goto("https://suno.com/create");
 await page.waitForLoadState();
-await page.waitForSelector('button[aria-label="Advanced"]', { timeout: 30000 });
+// Advanced 전환 버튼: 예전 button[aria-label="Advanced"] → 2026-10-03 button[role=tab] 텍스트 "Advanced". 둘 다 지원
+const markAdvanced = () => {
+  const b =
+    document.querySelector('button[aria-label="Advanced"]') ||
+    [...document.querySelectorAll('button[role="tab"], button')].find((e) => e.innerText.trim() === "Advanced");
+  if (b) b.setAttribute("data-mg-advanced", "");
+  return Boolean(b);
+};
+await page.waitForFunction(markAdvanced, undefined, { timeout: 30000 });
 await page.waitForTimeout(2000);
-if (/Log in/.test(await page.evaluate(() => document.body.innerText.slice(0, 2000)))) throw new Error("Suno 로그아웃 상태: 로그인 필요");
-await page.click('button[aria-label="Advanced"]', { label: "Advanced mode" });
+if (/Log in/.test(await page.evaluate(() => document.body?.innerText.slice(0, 2000) ?? ""))) throw new Error("Suno 로그아웃 상태: 로그인 필요");
+await page.evaluate(markAdvanced);
+await page.click("[data-mg-advanced]", { label: "Advanced mode" });
 await page.waitForTimeout(800);
 
 // 모델
