@@ -56,6 +56,12 @@ const markAdvanced = () => {
 await page.waitForFunction(markAdvanced, undefined, { timeout: 30000 });
 await page.waitForTimeout(2000);
 if (/Log in/.test(await page.evaluate(() => document.body?.innerText.slice(0, 2000) ?? ""))) throw new Error("Suno 로그아웃 상태: 로그인 필요");
+// 쿠키 동의 창(2026-10-03 확인)이 Create 버튼을 가림 → 선택 쿠키 거부로 닫음
+const cookieBtn = 'button[aria-label="Deny all optional cookies"]';
+if (await page.evaluate((sel) => Boolean(document.querySelector(sel)?.checkVisibility()), cookieBtn)) {
+  await page.click(cookieBtn, { label: "Reject optional cookies" });
+  await page.waitForTimeout(800);
+}
 await page.evaluate(markAdvanced);
 await page.click("[data-mg-advanced]", { label: "Advanced mode" });
 await page.waitForTimeout(800);
