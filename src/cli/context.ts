@@ -1,4 +1,4 @@
-import { existsSync, lstatSync, readdirSync } from "node:fs";
+import { existsSync, lstatSync, readdirSync, realpathSync } from "node:fs";
 import { relative, resolve } from "node:path";
 import { Catalog } from "../../core/catalog.ts";
 import { readJson } from "../../core/files.ts";
@@ -41,6 +41,11 @@ type ModuleInfo = {
   relations: { name: string; from: string[]; to: string[]; pin?: string }[];
   records: number;
   has_code: string[];
+  /** Real location when the module path is a symlink (e.g. `link:` install). */
+  linked_to?: string;
+  /** Linked outside the project: other projects may share its files. */
+  shared?: boolean;
+  docs?: string;
   ejected?: Ejected;
 };
 type PipelineInfo = {
@@ -119,6 +124,24 @@ function ejectInfo(dir: string, id: string): Ejected | undefined {
   };
 }
 
+/** Symlinked install (`link:`, `bun link`): where the files really live. */
+function linkInfo(root: string, dir: string) {
+  let real: string, realRoot: string;
+  try {
+    real = realpathSync(dir);
+    realRoot = realpathSync(root);
+  } catch {
+    return {};
+  }
+  // Compare against the real root so OS-level aliases (/tmp → /private/tmp) don't count.
+  if (real === resolve(realRoot, relative(root, dir))) return {};
+  const outside = relative(realRoot, real).startsWith("..");
+  return {
+    linked_to: outside ? relative(realRoot, real) : rel(realRoot, real),
+    ...(outside ? { shared: true } : {}),
+  };
+}
+
 function codeFiles(dir: string) {
   const out: string[] = [];
   for (const name of ["run.ts", "src", "pipelines"])
@@ -192,6 +215,13 @@ export async function inventory(
       })),
       records: countBy.get(m.manifest.id) ?? 0,
       has_code: codeFiles(m.dir),
+      ...(m.kind === "builtin" ? {} : linkInfo(root, m.dir)),
+      ...(existsSync(resolve(m.dir, "README.md"))
+        ? {
+            docs:
+              (m.kind === "builtin" ? m.dir : rel(root, m.dir)) + "/README.md",
+          }
+        : {}),
       ...(ejected ? { ejected } : {}),
     };
   });
@@ -458,6 +488,12 @@ export function renderModule(
     `- spec: \`${m.spec}\`, path: ${m.path}`,
     `- requires: ${m.requires.join(", ") || "-"}; required by: ${m.required_by.join(", ") || "-"}`,
     `- records owned: ${m.records}; code: ${m.has_code.join(", ") || "schema only"}`,
+    ...(m.linked_to
+      ? [
+          `- linked → ${m.linked_to}${m.shared ? " (outside project; files the module writes there may be shared with other projects)" : ""}`,
+        ]
+      : []),
+    ...(m.docs ? [`- docs: ${m.docs}`] : []),
     "",
     "## Types",
     ...m.types.map(
