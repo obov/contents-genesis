@@ -49,9 +49,10 @@
   },
   "scripts": {
     "cg": "bun src/cli/main.ts",
-    "check": "tsc --noEmit && bun test ./tests",
+    "check": "tsc --noEmit && bun run check:versions && bun test ./tests",
+    "check:versions": "bun scripts/check-versions.ts",
     "test": "bun test ./tests",
-    "format": "prettier --write core runtime modules src tests bin",
+    "format": "prettier --write core runtime modules src scripts tests bin",
     "prepublishOnly": "bun run check"
   },
   "dependencies": {

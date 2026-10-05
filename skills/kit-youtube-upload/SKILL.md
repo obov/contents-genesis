@@ -1,6 +1,8 @@
 ---
 name: kit-youtube-upload
 description: "[재사용] ego-browser로 YouTube Studio에 영상을 업로드하고 메타데이터·공개 예약을 설정하는 키트. 업로드 전 대상 채널 대조 필수. \"유튜브 업로드\", \"영상 올려줘\", \"공개 예약\", \"초안만 설정\", \"업로드 이어서\", \"영상 삭제\" 요청. 성과 분석·Ask Studio 대화는 youtube-studio-analyst. 도구 scripts/upload.mjs."
+metadata:
+  version: "1.0.0"
 ---
 
 # YouTube Studio 업로드 (재사용 키트)

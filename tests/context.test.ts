@@ -11,6 +11,7 @@ import {
 } from "node:fs";
 import { tmpdir } from "node:os";
 import { resolve } from "node:path";
+import { diffStates, type State } from "../src/cli/tracking.ts";
 
 const repo = resolve(import.meta.dir, ".."),
   main = resolve(repo, "src/cli/main.ts"),
@@ -211,4 +212,50 @@ test("context warns about unlinked skills and records of removed modules", () =>
   rmSync(resolve(root, ".agents/skills/cg-context"));
   const brief = cg(root, "context", "--brief").out;
   expect(brief).toContain("shared skill cg-context not linked");
+});
+
+test("skill versions are shown and their changes tracked", () => {
+  const root = init("--no-renderer"),
+    skill = resolve(root, ".agents/skills/my-skill"),
+    write = (version: string) =>
+      writeFileSync(
+        resolve(skill, "SKILL.md"),
+        `---\nname: my-skill\ndescription: demo\nmetadata:\n  version: "${version}"\n---\n# my\n`,
+      );
+  mkdirSync(skill, { recursive: true });
+  write("1.0.0");
+  const brief = cg(root, "context", "--brief").out;
+  expect(brief).toContain("shared cg-context@1.0.0");
+  expect(brief).toContain("project my-skill@1.0.0");
+
+  write("1.1.0");
+  cg(root, "doctor");
+  expect(history(root).at(-1).changes).toContainEqual({
+    kind: "project_skill_changed",
+    target: "my-skill",
+    detail: "version 1.0.0 → 1.1.0",
+  });
+});
+
+test("shared skill version bumps are diffed; old state files are not", () => {
+  const state = (versions?: Record<string, string>): State => ({
+    project_sha256: "x",
+    modules: {},
+    pipelines: {},
+    default_pipeline: null,
+    skills: { shared: ["kit-suno", "local:mine"], project: {}, versions },
+  });
+  expect(
+    diffStates(
+      state({ "kit-suno": "1.0.0", mine: "0.1.0" }),
+      state({ "kit-suno": "1.1.0", mine: "0.1.0" }),
+    ),
+  ).toEqual([
+    {
+      kind: "shared_skill_changed",
+      target: "kit-suno",
+      detail: "version 1.0.0 → 1.1.0",
+    },
+  ]);
+  expect(diffStates(state(), state({ "kit-suno": "1.1.0" }))).toEqual([]);
 });

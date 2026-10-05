@@ -1,6 +1,8 @@
 ---
 name: youtube-studio-analyst
 description: Use ego-browser to converse with YouTube Studio's Ask Studio agent, verify channel and video performance against Analytics, and record evidence-backed improvement experiments. Use for Studio-agent conversations or checking its performance claims, not video uploads or publishing.
+metadata:
+  version: "1.0.0"
 ---
 
 # YouTube Studio 에이전트와 성과 검토

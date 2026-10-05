@@ -10,6 +10,6 @@
     "allowImportingTsExtensions": true,
     "noUncheckedIndexedAccess": true
   },
-  "include": ["core", "runtime", "modules", "src", "tests"],
+  "include": ["core", "runtime", "modules", "src", "scripts", "tests"],
   "exclude": ["templates", "node_modules"]
 }

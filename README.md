@@ -167,8 +167,11 @@ cg write FILE | show ID [REV] | alias NS VALUE | links ID | search TEXT [TYPE] |
 
 ```bash
 bun install
-bun run check        # tsc + 계약 테스트 + CLI 테스트
+bun run check        # tsc + 개별 버전 검사 + 계약 테스트 + CLI 테스트
 ```
+
+개별 버전: 모듈 `modules/<id>/module.json`의 `version`, 스킬 `skills/<name>/SKILL.md` frontmatter `metadata.version`.
+`bun run check:versions`: 직전 릴리스 태그 대비 파일이 바뀐 모듈·스킬의 버전 미증가 시 실패. 패키지 버전과 독립.
 
 로컬 checkout에서 `init` 시 의존성은 `file:<checkout>` (복사 설치).
 checkout 수정 즉시 반영 필요 시: 이 디렉터리에서 `bun link` → 프로젝트 의존성 `"contents-genesis": "link:contents-genesis"`.

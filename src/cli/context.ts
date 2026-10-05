@@ -12,7 +12,7 @@ import {
   readProject,
 } from "./project.ts";
 import { fileHashes, readHistory, type HistoryEntry } from "./tracking.ts";
-import { skillDirName } from "./skills.ts";
+import { skillDirName, versionOf } from "./skills.ts";
 
 /**
  * Agent-facing snapshot of how this project is assembled: which modules and
@@ -62,7 +62,10 @@ export type Inventory = {
   project: { id: string; root: string; contents_genesis: string };
   modules: ModuleInfo[];
   pipelines: PipelineInfo[];
-  skills: { shared: { name: string; linked: boolean }[]; project: string[] };
+  skills: {
+    shared: { name: string; linked: boolean; version?: string }[];
+    project: { name: string; version?: string }[];
+  };
   workspace: {
     records: number;
     unknown_type_records: number;
@@ -276,11 +279,14 @@ export async function inventory(
     linked:
       isLink(skillDirName(name)) &&
       existsSync(resolve(skillsDir, skillDirName(name), "SKILL.md")),
+    ...versionOf(resolve(skillsDir, skillDirName(name))),
   }));
   for (const s of shared)
     if (!s.linked)
       warnings.push(`shared skill ${s.name} not linked; run cg skill link`);
-  const projectSkills = present.filter((n) => !n.startsWith(".") && !isLink(n));
+  const projectSkills = present
+    .filter((n) => !n.startsWith(".") && !isLink(n))
+    .map((name) => ({ name, ...versionOf(resolve(skillsDir, name)) }));
 
   // Workspace + runs.
   let workspace: Inventory["workspace"] = null;
@@ -336,6 +342,8 @@ export async function inventory(
 // ---------- rendering ----------
 
 const day = (iso: string) => iso.replace("T", " ").slice(0, 16);
+const versioned = (s: { name: string; version?: string }) =>
+  s.version ? `${s.name}@${s.version}` : s.name;
 const changeLine = (e: HistoryEntry) => {
   const who =
     e.source === "external" ? `observed by ${e.observed_by}` : e.actor;
@@ -391,7 +399,7 @@ export function renderBrief(inv: Inventory) {
           .join(" "),
     );
   lines.push(
-    `skills: shared ${inv.skills.shared.map((s) => s.name).join(", ") || "-"}; project ${inv.skills.project.join(", ") || "-"}`,
+    `skills: shared ${inv.skills.shared.map(versioned).join(", ") || "-"}; project ${inv.skills.project.map(versioned).join(", ") || "-"}`,
   );
   if (inv.workspace) {
     const last = inv.workspace.recent_runs[0];
@@ -448,8 +456,8 @@ export function renderFull(inv: Inventory) {
     "",
     "## Skills",
     "",
-    `- shared: ${inv.skills.shared.map((s) => s.name + (s.linked ? "" : " (NOT LINKED)")).join(", ") || "-"}`,
-    `- project: ${inv.skills.project.join(", ") || "-"}`,
+    `- shared: ${inv.skills.shared.map((s) => versioned(s) + (s.linked ? "" : " (NOT LINKED)")).join(", ") || "-"}`,
+    `- project: ${inv.skills.project.map(versioned).join(", ") || "-"}`,
   );
   if (inv.workspace) {
     out.push(

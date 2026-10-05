@@ -1,6 +1,8 @@
 ---
 name: kit-suno
 description: "[재사용] ego-browser로 suno.com에서 곡을 생성·다운로드하고 크레딧·다운로드 잔량을 확인하는 키트. 공식 API 없음(2026-10 기준) → 웹 자동화. \"노래 만들어줘\", \"곡 생성\", \"suno\", \"음원 다운로드\", \"크레딧 얼마 남았어\" 요청. 도구 scripts/generate.mjs."
+metadata:
+  version: "1.0.0"
 ---
 
 # Suno 생성·다운로드 (재사용 키트)

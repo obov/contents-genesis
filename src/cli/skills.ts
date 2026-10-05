@@ -3,6 +3,7 @@ import {
   existsSync,
   lstatSync,
   mkdirSync,
+  readFileSync,
   readdirSync,
   renameSync,
   rmSync,
@@ -21,6 +22,37 @@ export const localRegistry = () =>
   process.env.CG_SKILLS_HOME || resolve(homedir(), ".cg/skills");
 
 const isLocal = (spec: string) => spec.startsWith(LOCAL);
+
+/**
+ * Per-skill version from SKILL.md frontmatter `metadata.version` (Agent Skills
+ * spec keeps custom keys under `metadata`). null when unversioned.
+ */
+export function skillVersion(dir: string): string | null {
+  const file = resolve(dir, "SKILL.md");
+  return existsSync(file)
+    ? parseSkillVersion(readFileSync(file, "utf8"))
+    : null;
+}
+
+/** `metadata.version` from SKILL.md text. */
+export function parseSkillVersion(text: string): string | null {
+  const front = /^---\r?\n([\s\S]*?)\r?\n---/.exec(text)?.[1];
+  const metadata =
+    front &&
+    /^metadata:[ \t]*\r?\n((?:[ \t]+.*(?:\r?\n|$))*)/m.exec(front)?.[1];
+  return (
+    (metadata &&
+      /^[ \t]+version:[ \t]*["']?([^"'\s#]+)/m.exec(metadata)?.[1]) ||
+    null
+  );
+}
+
+/** `{ version }` when the skill at dir declares one (spread into list entries). */
+export const versionOf = (dir: string) => {
+  const version = skillVersion(dir);
+  return version ? { version } : {};
+};
+
 /** Directory name under .agents/skills for a project.json skill spec. */
 export const skillDirName = (spec: string) =>
   isLocal(spec) ? spec.slice(LOCAL.length) : spec;
@@ -111,17 +143,18 @@ export function listSkills(root: string) {
   const specs = readProject(root).skills ?? [],
     dir = resolve(root, SKILLS_DIR),
     present = existsSync(dir) ? readdirSync(dir) : [],
-    linked = (spec: string) => isLink(resolve(dir, skillDirName(spec)));
+    linked = (spec: string) => isLink(resolve(dir, skillDirName(spec))),
+    entry = (name: string) => ({
+      name,
+      linked: linked(name),
+      ...versionOf(resolve(dir, skillDirName(name))),
+    });
   return {
-    shared: specs
-      .filter((s) => !isLocal(s))
-      .map((name) => ({ name, linked: linked(name) })),
-    local: specs
-      .filter(isLocal)
-      .map((name) => ({ name, linked: linked(name) })),
-    project: present.filter(
-      (name) => !isLink(resolve(dir, name)) && !name.startsWith("."),
-    ),
+    shared: specs.filter((s) => !isLocal(s)).map(entry),
+    local: specs.filter(isLocal).map(entry),
+    project: present
+      .filter((name) => !isLink(resolve(dir, name)) && !name.startsWith("."))
+      .map((name) => ({ name, ...versionOf(resolve(dir, name)) })),
     available: availableSkills().filter((n) => !specs.includes(n)),
     available_local: localSkills()
       .map((n) => LOCAL + n)

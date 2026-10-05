@@ -1,6 +1,8 @@
 ---
 name: kit-cloudflare-tunnel
 description: "[재사용] Cloudflare Tunnel로 로컬 서비스를 도메인에 공개하고 Cloudflare Access(Zero Trust)로 이메일 기반 로그인 보호를 거는 키트. \"터널 열어줘\", \"로컬 서버 외부 공개\", \"cloudflared\", \"도메인 연결\", \"Access 걸어줘\", \"나만 접속하게\", \"접근 제한\", \"임시 공유 URL\" 요청. 도구 scripts/tunnel.mjs, scripts/access.mjs."
+metadata:
+  version: "1.0.0"
 ---
 
 # Cloudflare Tunnel + Access (재사용 키트)

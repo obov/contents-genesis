@@ -181,7 +181,11 @@ test("skills link, list and unlink without touching project-owned skills", () =>
   expect(cg(root, "skill", "add", "kit-chatgpt-image").ok).toBe(true);
   expect(project(root).skills).toEqual(["cg-context", "kit-chatgpt-image"]);
   const list = json(cg(root, "skill", "list"));
-  expect(list.shared[1]).toEqual({ name: "kit-chatgpt-image", linked: true });
+  expect(list.shared[1]).toEqual({
+    name: "kit-chatgpt-image",
+    linked: true,
+    version: "1.0.0",
+  });
   expect(cg(root, "skill", "remove", "kit-chatgpt-image").ok).toBe(true);
   expect(existsSync(resolve(root, ".agents/skills/kit-chatgpt-image"))).toBe(
     false,

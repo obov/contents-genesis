@@ -9,6 +9,7 @@ import { resolve } from "node:path";
 import { atomicJson, hash, readJson } from "../../core/files.ts";
 import type { Manifest, ProjectConfig } from "../../core/model.ts";
 import { resolveModule } from "../../core/resolve.ts";
+import { skillDirName, skillVersion } from "./skills.ts";
 
 /**
  * Configuration tracking. `.cg/state.json` holds the last observed fingerprint;
@@ -33,7 +34,12 @@ export type State = {
     { use: string; options_sha256: string; sha256?: string }
   >;
   default_pipeline: string | null;
-  skills: { shared: string[]; project: Record<string, string> };
+  skills: {
+    shared: string[];
+    project: Record<string, string>;
+    /** Declared version per .agents/skills directory (absent in older state files). */
+    versions?: Record<string, string>;
+  };
 };
 export type Change = { kind: string; target: string; detail?: string };
 export type HistoryEntry = {
@@ -127,17 +133,22 @@ export function fingerprint(root: string): State {
     };
   }
   const skillsDir = resolve(root, ".agents/skills"),
-    project: Record<string, string> = {};
+    project: Record<string, string> = {},
+    versions: Record<string, string> = {};
   if (existsSync(skillsDir))
-    for (const entry of readdirSync(skillsDir, { withFileTypes: true }))
-      if (entry.isDirectory() && !entry.name.startsWith("."))
+    for (const entry of readdirSync(skillsDir, { withFileTypes: true })) {
+      if (entry.name.startsWith(".")) continue;
+      if (entry.isDirectory())
         project[entry.name] = treeHash(resolve(skillsDir, entry.name));
+      const version = skillVersion(resolve(skillsDir, entry.name));
+      if (version) versions[entry.name] = version;
+    }
   return {
     project_sha256: hash(raw),
     modules,
     pipelines,
     default_pipeline: config.production?.default_pipeline ?? null,
-    skills: { shared: [...(config.skills ?? [])].sort(), project },
+    skills: { shared: [...(config.skills ?? [])].sort(), project, versions },
   };
 }
 
@@ -203,6 +214,21 @@ export function diffStates(before: State, after: State): Change[] {
     (n) => n,
     () => undefined,
   );
+  // Older state files have no versions: treat as unknown, not as a change.
+  const versionChange = (dir: string) => {
+    const x = before.skills.versions?.[dir],
+      y = after.skills.versions?.[dir];
+    return before.skills.versions && x !== y
+      ? `version ${x ?? "none"} → ${y ?? "none"}`
+      : undefined;
+  };
+  for (const spec of after.skills.shared) {
+    const detail = before.skills.shared.includes(spec)
+      ? versionChange(skillDirName(spec))
+      : undefined;
+    if (detail)
+      changes.push({ kind: "shared_skill_changed", target: spec, detail });
+  }
   keyed(
     "project_skill",
     before.skills.project,
@@ -210,6 +236,9 @@ export function diffStates(before: State, after: State): Change[] {
     (n) => n,
     () => "files edited",
   );
+  for (const change of changes)
+    if (change.kind === "project_skill_changed")
+      change.detail = versionChange(change.target) ?? change.detail;
   if (!changes.length && before.project_sha256 !== after.project_sha256)
     changes.push({ kind: "project_json_changed", target: "project.json" });
   return changes;
@@ -267,7 +296,7 @@ export function observe(root: string): State {
   }
   const previous = readJson<State>(file),
     changes = diffStates(previous, current);
-  if (changes.length) {
+  if (changes.length)
     append(root, {
       at: new Date().toISOString(),
       actor: "unknown",
@@ -275,8 +304,8 @@ export function observe(root: string): State {
       source: "external",
       changes,
     });
-    atomicJson(file, current);
-  }
+  // Also upgrade state files written before skill versions were tracked.
+  if (changes.length || !previous.skills.versions) atomicJson(file, current);
   return current;
 }
 

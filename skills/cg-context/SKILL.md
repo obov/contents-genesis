@@ -1,6 +1,8 @@
 ---
 name: cg-context
 description: "contents-genesis(cg) 자체에 관한 단일 스킬. 'cg' = contents-genesis (npm 패키지 contents-genesis, 원본 저장소 github.com/obov/contents-genesis, 로컬 원본 ../contents-genesis). 분기: (1) 프로젝트 구성·커스텀·변경 이력 조회 (2) cg 버전 갱신·공유 스킬 받기 (3) 원본 저장소에서 공유 스킬 추가·수정·npm 배포 (4) 버전업 없이 이 머신의 로컬 레지스트리(~/.cg/skills)로 프로젝트 간 스킬 공유. \"모듈 뭐 있어\", \"pipeline 구성\", \"커스텀한 거\", \"최근 변경\", \"production 어떻게 돌려\", \"cg 받아줘\", \"cg 최신화\", \"0.4.x로 스킬 공유했어\", \"<스킬명> 받아줘\", \"cg에 스킬 추가\", \"스킬 공유해줘\", \"cg 배포\", \"npm 배포\", \"버전 올려줘\", \"로컬 스킬 공유\", \"프로젝트 간 스킬 공유\", \"이 스킬 다른 프로젝트에서도 쓰게\", \"local:<스킬명>\", \"skill publish\" 요청. 콘텐츠 작업 스킬(kit-*)과 별개."
+metadata:
+  version: "1.0.0"
 ---
 
 # cg (contents-genesis)
@@ -75,6 +77,8 @@ bun cg context --brief                                         # 7. 반영 확�
 
 ```text
 skills/<name>/SKILL.md (+ scripts/)    프로젝트 고유 정보(계정·채널·경로) 금지. 절차·도구만
+스킬 버전                               frontmatter metadata.version. 스킬 파일 변경 시 해당 스킬만 올림 (patch 수정 · minor 기능 추가 · major 사용법 변경)
+모듈 버전                               modules/<id>/module.json version. 모듈 파일 변경 시 해당 모듈만 올림
 이름                                    cg 자체 → 이 스킬에 분기 추가 (cg-* 스킬 분할 금지) · 콘텐츠 작업 → kit-*
 .claude-plugin/plugin.json description   새 kit 추가 시 목록 갱신
 ```
@@ -83,7 +87,7 @@ skills/<name>/SKILL.md (+ scripts/)    프로젝트 고유 정보(계정·채널
 
 ```sh
 git status --short                     # 1. 사용자 미커밋 변경은 커밋에서 제외 (경로 지정 add)
-bun run check                          # 2. tsc + 테스트
+bun run check                          # 2. tsc + 개별 버전 검사(check:versions) + 테스트
 # 3. 버전 올림: package.json · .claude-plugin/plugin.json 동일 버전 (patch: 스킬 추가·수정)
 git commit -m "<변경 요약>"             # 4. 변경 커밋 → 버전 커밋 "X.Y.Z" (기존 이력 형식)
 git push origin main                   # 5.

@@ -1,6 +1,8 @@
 ---
 name: kit-browser-automation
 description: "[재사용] ego-browser 자동화 공통 노하우. 어떤 사이트든 브라우저 작업 전에 먼저 읽는다: 스크립트 실행(환경변수·cwd 미전달), 사용자 제어 전환, alert/confirm으로 인한 멈춤, iframe 좌표 클릭, 팝업·파일 업로드·blob 저장, 속도 제한(429)·SPA 대기, 검증 습관. 네이버·ChatGPT에서 검증된 사례 포함."
+metadata:
+  version: "1.0.0"
 ---
 
 # 브라우저 자동화 공통 노하우 (재사용 키트) (2026-09-30 ~ 10-01 실전에서 확인)

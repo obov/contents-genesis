@@ -1,6 +1,8 @@
 ---
 name: kit-chatgpt-image
 description: "[재사용] ego-browser로 chatgpt.com에서 이미지를 생성·저장하는 키트. 인물(페르소나) 일관성 유지, 제품 참조 합성, 프로필·커버·본문 이미지. \"사진 만들어줘\", \"이미지 생성\", \"프로필이랑 제품 합성\", \"커버 이미지\" 요청. 도구 scripts/generate-image.sh."
+metadata:
+  version: "1.0.0"
 ---
 
 # ChatGPT 이미지 생성 (재사용 키트)

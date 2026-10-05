@@ -8,6 +8,8 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v5
+        with:
+          fetch-depth: 0 # tags for check:versions
       - uses: oven-sh/setup-bun@v2
         with:
           bun-version: 1.4.2
