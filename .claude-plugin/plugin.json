@@ -1,6 +1,6 @@
 {
   "name": "contents-genesis",
-  "version": "0.4.5",
+  "version": "0.4.6",
   "description": "Shared content-production skills: browser automation kit, ChatGPT image kit, Suno kit, Cloudflare tunnel kit, YouTube upload kit, YouTube Studio analyst.",
   "license": "MIT",
   "repository": "https://github.com/obov/contents-genesis"
