@@ -1,0 +1,18 @@
+{
+  "type": "object",
+  "properties": {
+    "period_start": { "type": "string", "minLength": 10 },
+    "period_end": { "type": "string", "minLength": 10 },
+    "currency": { "type": "string", "minLength": 3 },
+    "estimated_earnings": { "type": "number" },
+    "page_views": { "type": "number" },
+    "impressions": { "type": "number" },
+    "clicks": { "type": "number" },
+    "page_rpm": { "type": "number" },
+    "ctr": { "type": "number" },
+    "cpc": { "type": "number" },
+    "source": { "enum": ["adsense-ui", "adsense-api", "blogger-earnings", "manual"] }
+  },
+  "required": ["period_start", "period_end", "currency", "estimated_earnings", "source"],
+  "additionalProperties": true
+}

@@ -1,0 +1,22 @@
+{
+  "type": "object",
+  "properties": {
+    "checked_at": { "type": "string" },
+    "verdict": { "enum": ["ready", "not_ready"] },
+    "checks": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "code": { "type": "string", "minLength": 1 },
+          "status": { "enum": ["pass", "fail", "warn", "na"] },
+          "note": { "type": "string" }
+        },
+        "required": ["code", "status"],
+        "additionalProperties": true
+      }
+    }
+  },
+  "required": ["checked_at", "verdict", "checks"],
+  "additionalProperties": true
+}

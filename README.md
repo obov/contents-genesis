@@ -25,6 +25,7 @@ Bun(>=1.3) 필요. `npx`는 Node shim(`bin/cg.js`)이 bun으로 위임.
 
 ```bash
 cg module add experiments                  # 기본 모듈 (누락 의존성 자동 추가)
+cg module add adsense                      # opt-in 기본 모듈 (init 기본값 제외). AdSense 신청 상태 · 점검 · 수익 기록
 cg module add ./modules/scenes             # 로컬 모듈
 cg module add github:owner/cg-naver-blog   # 외부 패키지 (bun add 후 등록, 실패 시 롤백)
 cg module remove analytics [--cascade]     # 의존 모듈 있으면 거부, --cascade로 함께 제거

@@ -62,6 +62,9 @@ function withDependencies(names: string[]) {
   return [...out];
 }
 
+/** Builtin modules added only on request (cg module add / init --modules). */
+const OPT_IN_MODULES = new Set(["adsense"]);
+
 export function initProject(dir: string, options: InitOptions) {
   const root = resolve(dir),
     id =
@@ -73,7 +76,9 @@ export function initProject(dir: string, options: InitOptions) {
     throw new Error(`project.json already exists in ${root}`);
   mkdirSync(root, { recursive: true });
 
-  const modules = withDependencies(options.modules ?? builtinModules()).map(
+  const modules = withDependencies(
+    options.modules ?? builtinModules().filter((m) => !OPT_IN_MODULES.has(m)),
+  ).map(
     builtinSpec,
   );
   // cg-context is how agents learn the project layout; link it by default.

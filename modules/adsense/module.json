@@ -1,0 +1,42 @@
+{
+  "manifest_version": "1.0.0",
+  "id": "adsense",
+  "version": "1.0.0",
+  "requires_core": "1.x",
+  "requires_modules": {
+    "publication": "1.x"
+  },
+  "types": [
+    {
+      "name": "adsense.site",
+      "version": "1.0.0",
+      "schema": "schemas/site.v1.json"
+    },
+    {
+      "name": "adsense.readiness",
+      "version": "1.0.0",
+      "schema": "schemas/readiness.v1.json"
+    },
+    {
+      "name": "adsense.earnings",
+      "version": "1.0.0",
+      "schema": "schemas/earnings.v1.json"
+    }
+  ],
+  "relations": [
+    {
+      "name": "adsense.assesses",
+      "version": "1.0.0",
+      "schema": "schemas/assesses.v1.json",
+      "from_types": ["adsense.readiness"],
+      "to_types": ["adsense.site"]
+    },
+    {
+      "name": "adsense.earned_on",
+      "version": "1.0.0",
+      "schema": "schemas/earned_on.v1.json",
+      "from_types": ["adsense.earnings"],
+      "to_types": ["adsense.site", "publication.item"]
+    }
+  ]
+}
