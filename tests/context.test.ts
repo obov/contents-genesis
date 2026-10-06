@@ -11,6 +11,7 @@ import {
 } from "node:fs";
 import { tmpdir } from "node:os";
 import { resolve } from "node:path";
+import { parseSkillVersion } from "../src/cli/skills.ts";
 import { diffStates, type State } from "../src/cli/tracking.ts";
 
 const repo = resolve(import.meta.dir, ".."),
@@ -225,7 +226,8 @@ test("skill versions are shown and their changes tracked", () => {
   mkdirSync(skill, { recursive: true });
   write("1.0.0");
   const brief = cg(root, "context", "--brief").out;
-  expect(brief).toContain("shared cg-context@1.0.0");
+  const cgContextVersion = parseSkillVersion(readFileSync(resolve(import.meta.dir, "../skills/cg-context/SKILL.md"), "utf8"));
+  expect(brief).toContain(`shared cg-context@${cgContextVersion}`);
   expect(brief).toContain("project my-skill@1.0.0");
 
   write("1.1.0");
