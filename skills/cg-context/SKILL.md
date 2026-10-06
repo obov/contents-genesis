@@ -1,8 +1,8 @@
 ---
 name: cg-context
-description: "contents-genesis(cg) 자체에 관한 단일 스킬. 'cg' = contents-genesis (npm 패키지 contents-genesis, 원본 저장소 github.com/obov/contents-genesis, 로컬 원본 ../contents-genesis). 분기: (1) 프로젝트 구성·커스텀·변경 이력 조회 (2) cg 버전 갱신·공유 스킬 받기 (3) 원본 저장소에서 공유 스킬 추가·수정·npm 배포 (4) 버전업 없이 이 머신의 로컬 레지스트리(~/.cg/skills)로 프로젝트 간 스킬 공유. \"모듈 뭐 있어\", \"pipeline 구성\", \"커스텀한 거\", \"최근 변경\", \"production 어떻게 돌려\", \"cg 받아줘\", \"cg 최신화\", \"0.4.x로 스킬 공유했어\", \"<스킬명> 받아줘\", \"cg에 스킬 추가\", \"스킬 공유해줘\", \"cg 배포\", \"npm 배포\", \"버전 올려줘\", \"로컬 스킬 공유\", \"프로젝트 간 스킬 공유\", \"이 스킬 다른 프로젝트에서도 쓰게\", \"local:<스킬명>\", \"skill publish\" 요청. 콘텐츠 작업 스킬(kit-*)과 별개."
+description: "contents-genesis(cg) 자체에 관한 단일 스킬. 'cg' = contents-genesis (npm 패키지 contents-genesis, 원본 저장소 github.com/obov/contents-genesis, 로컬 원본 ../contents-genesis). 분기: (1) 프로젝트 구성·커스텀·변경 이력 조회 (2) cg 버전 갱신·공유 스킬 받기 (3) 원본 저장소에서 공유 스킬 추가·수정·npm 배포 (4) 버전업 없이 이 머신의 로컬 레지스트리(~/.cg/skills)로 프로젝트 간 스킬 공유 (5) 공용 모듈(cg-* 저장소) 태그 의존 · 개발 모드(bun link) · 모듈 릴리스 · 데이터 홈(~/.cg/data). \"모듈 뭐 있어\", \"pipeline 구성\", \"커스텀한 거\", \"최근 변경\", \"production 어떻게 돌려\", \"cg 받아줘\", \"cg 최신화\", \"0.4.x로 스킬 공유했어\", \"<스킬명> 받아줘\", \"cg에 스킬 추가\", \"스킬 공유해줘\", \"cg 배포\", \"npm 배포\", \"버전 올려줘\", \"로컬 스킬 공유\", \"프로젝트 간 스킬 공유\", \"이 스킬 다른 프로젝트에서도 쓰게\", \"local:<스킬명>\", \"skill publish\", \"모듈 태그\", \"모듈 버전 올려\", \"모듈 고치면서 테스트\", \"bun link\", \"link: 로 연결\", \"공용 모듈 받기\", \"데이터 홈\", \"모듈 데이터 어디\" 요청. 콘텐츠 작업 스킬(kit-*)과 별개."
 metadata:
-  version: "1.0.0"
+  version: "1.1.0"
 ---
 
 # cg (contents-genesis)
@@ -14,7 +14,9 @@ cg              contents-genesis. 프로젝트 기반 프레임워크 + CLI (bun
 원본 저장소      github.com/obov/contents-genesis. 로컬 ../contents-genesis (있을 때)
 cg 프로젝트      project.json 이 있는 저장소. contents-genesis 를 npm 의존성으로 사용
 공유 스킬        원본 skills/<name>. 프로젝트 .agents/skills/<name> 에 symlink
-로컬 스킬        로컬 레지스트리 ~/.cg/skills/<name> (CG_SKILLS_HOME). project.json 에 local:<name>. npm 배포 없음
+로컬 스킬        로컬 레지스트리 ~/.cg/skills/<name> (CG_SKILLS_HOME). project.json 에 local:<name>. npm 배포 없음. 사용자 취향에 맞춘 스킬
+공용 모듈        cg-<id> 저장소 (module.json). 프로젝트는 GitHub 태그로 설치 (B5)
+데이터 홈        ~/.cg/data/<모듈 id> (CG_DATA_HOME). 모듈이 쓰는 사용자 데이터. 모듈 폴더(재설치 때 지워짐)에 두지 않음
 스킬 접두어      cg-* = cg 자체 · kit-* = 콘텐츠 작업 재사용 키트 · 그 외 = 프로젝트/도메인
 "0.4.x로 공유했어"  해당 버전에 새 공유 스킬·수정이 담겨 npm 배포됨 → 프로젝트에서 받기 (B2)
 ```
@@ -28,6 +30,8 @@ cg 프로젝트                       받아줘 · 최신화 · 공유했어    
 원본 저장소 (package name = contents-genesis)  스킬 추가 · 수정 · 배포   B3 원본 작업 · 배포
 cg 프로젝트에서 "cg에 올려/배포"    원본 저장소로 이동 → B3 → 다시 프로젝트에서 B2
 cg 프로젝트                       프로젝트 간 스킬 공유 (버전업 없이)  B4 로컬 레지스트리
+
+cg 프로젝트 · cg-* 모듈 저장소      모듈 받기 · 수정 · 버전 · 데이터    B5 공용 모듈
 
 공유 경로 선택: 이 머신의 프로젝트끼리만 → B4 · 다른 사람·다른 머신·모든 cg 사용자 → B3
 ```
@@ -115,9 +119,53 @@ bun cg check                       # missing_local_skills: 이 머신 레지스�
 - 같은 이름의 패키지 공유 스킬이 연결돼 있으면 거부 → `skill remove <name>` 후 재시도
 - 다른 머신 클론: `cg skill link` 결과 `missing` 에 표시 (실패 아님). 레지스트리에 스킬 복사 후 `cg skill link`
 - 모든 cg 사용자에게 배포하려면 원본 `skills/<name>` 으로 옮겨 B3
+- 버전 · 백업 (cg-backup 0.2+): 모든 로컬 스킬은 SKILL.md `metadata.version` 필수, 수정하면 버전 올림. 백업 브랜치 `skills/local` + 태그 `skills/<name>@<버전>`. 위반은 `bun cg run backup skills-check` (세션 시작 hook 에 `--brief`)
+- 모듈 저장소 안 스킬(`<모듈>/skills/kit-*`)을 레지스트리에 연결할 때는 symlink (내용 · 이력은 모듈 저장소)
+
+## B5. 공용 모듈 (cg-* 저장소)
+
+의존 방식: 평소 = GitHub 태그, 모듈 코드를 고치는 동안만 = 로컬 링크.
+
+```text
+package.json   "cg-<id>": "git+ssh://git@github.com/<owner>/cg-<id>.git#v<버전>"
+               private 저장소: github: · https 형식은 bun 이 API tarball 로 받아 404 → git+ssh 만
+project.json   modules 에 패키지 이름 ("cg-<id>"). 절대경로 · ../ 경로 금지
+금지           link: · file: · 절대경로를 package.json / project.json 에 커밋
+```
+
+개발 모드 (package.json 은 그대로):
+
+```sh
+cd ../cg-<id> && bun link            # 1. 한 번 (전역 링크 등록)
+cd <project> && bun link cg-<id>     # 2. node_modules/cg-<id> → 로컬 원본 링크. package.json 변경 없음
+# 수정 · 검증
+bun install                          # 3. 끝나면 태그 버전으로 복귀 (릴리스 후 태그 갱신)
+```
+
+릴리스 (모듈 저장소):
+
+```sh
+bun run check                                     # 1.
+# 2. package.json · module.json version 같이 올림 (patch 수정 · minor 기능 · major 사용법 변경)
+git commit -m "<변경 요약> (X.Y.Z)" && git push   # 3.
+git tag -a vX.Y.Z -m "cg-<id> vX.Y.Z" && git push origin vX.Y.Z   # 4. 태그 = package.json 버전
+# 5. 쓰는 프로젝트마다: package.json 태그 갱신 → bun install → bun run check → 커밋
+```
+
+- 새 태그를 bun 이 못 찾음 (`no commit matching "vX.Y.Z"`): bun git 캐시가 이전 clone → `~/.bun/install/cache/*.git` 중 그 저장소 것을 지우고 `bun install`
+- package.json `files` 에 런타임에 필요한 경로 포함 (태그 설치는 files 기준)
+- React · Remotion 을 peer 로 쓰는 모듈(cg-remotion-kit 등): 프로젝트 renderer 가 자기 node_modules 한 벌만 쓰게 tsconfig `paths` + remotion.config `resolve.modules` 에 renderer/node_modules 우선
+
+데이터 홈 (모듈이 사용자 데이터를 쓸 때):
+
+```text
+위치     CG_DATA_HOME ?? ~/.cg/data  +  /<모듈 id>   (모듈 코드가 직접 계산. 모듈 폴더 · import.meta.dir 아래 쓰기 금지)
+백업     module.json "backup": { "home": true }  → cg-backup 이 브랜치 module/<모듈 id> 로 주기 백업
+복원     bun cg run backup restore-module <모듈 id> ~/.cg/data/<모듈 id>
+```
 
 ## 규칙
 
 - 구성 변경은 가능한 한 cg 명령으로 (`cg module|pipeline|skill ...`). 직접 편집도 external 로 추적되지만 의도가 남지 않음
-- node_modules 안 공유 스킬·기본 모듈 직접 수정 금지. 수정은 원본에서 → B3 → B2
+- node_modules 안 공유 스킬·기본 모듈·공용 모듈 직접 수정 금지. 수정은 원본에서 → B3 → B2 (공용 모듈은 B5)
 - 변경 후 `bun cg check`
