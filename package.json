@@ -1,6 +1,6 @@
 {
   "name": "contents-genesis",
-  "version": "0.4.12",
+  "version": "0.4.13",
   "description": "Pluggable content-production workspace: core record store, builtin modules, shared agent skills and the cg CLI.",
   "keywords": [
     "content",
