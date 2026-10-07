@@ -2,7 +2,7 @@
 name: cg-context
 description: "contents-genesis(cg) 자체에 관한 단일 스킬. 'cg' = contents-genesis (npm 패키지 contents-genesis, 원본 저장소 github.com/obov/contents-genesis, 로컬 원본 ../contents-genesis). 분기: (1) 프로젝트 구성·커스텀·변경 이력 조회 (2) cg 버전 갱신·공유 스킬 받기 (3) 원본 저장소에서 공유 스킬 추가·수정·npm 배포 (4) 버전업 없이 이 머신의 로컬 레지스트리(~/.cg/skills)로 프로젝트 간 스킬 공유 (5) 공용 모듈(cg-* 저장소) 태그 의존 · 개발 모드(bun link) · 모듈 릴리스 · 데이터 홈(~/.cg/data). \"모듈 뭐 있어\", \"pipeline 구성\", \"커스텀한 거\", \"최근 변경\", \"production 어떻게 돌려\", \"cg 받아줘\", \"cg 최신화\", \"0.4.x로 스킬 공유했어\", \"<스킬명> 받아줘\", \"cg에 스킬 추가\", \"스킬 공유해줘\", \"cg 배포\", \"npm 배포\", \"버전 올려줘\", \"로컬 스킬 공유\", \"프로젝트 간 스킬 공유\", \"이 스킬 다른 프로젝트에서도 쓰게\", \"local:<스킬명>\", \"skill publish\", \"모듈 태그\", \"모듈 버전 올려\", \"모듈 고치면서 테스트\", \"bun link\", \"link: 로 연결\", \"공용 모듈 받기\", \"데이터 홈\", \"모듈 데이터 어디\" 요청. 콘텐츠 작업 스킬(kit-*)과 별개."
 metadata:
-  version: "1.3.0"
+  version: "1.4.0"
 ---
 
 # cg (contents-genesis)
@@ -143,6 +143,9 @@ cd <project> && bun link cg-<id>     # 2. node_modules/cg-<id> → 로컬 원본
 # 수정 · 검증
 bun install                          # 3. 끝나면 태그 버전으로 복귀 (릴리스 후 태그 갱신)
 ```
+
+- 링크가 남아 있는 동안 `cg context`(세션 시작 brief 포함) · `cg check` 가 `dependency <이름> is a local link … pins <spec>` 경고 (0.4.12+). 개발이 끝났는데 경고가 보이면 `rm node_modules/<이름> && bun install`. spec 을 `link:` 에서 버전으로 바꾼 뒤에도 `bun install` 이 기존 링크를 남길 수 있음
+- 설치 확인은 버전 번호가 아니라 링크 여부로 (`ls -la node_modules/<이름>`). 로컬 원본과 태그 버전이 같으면 버전 비교로는 구분 안 됨
 
 릴리스 (모듈 저장소):
 
