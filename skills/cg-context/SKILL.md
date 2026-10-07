@@ -2,7 +2,7 @@
 name: cg-context
 description: "contents-genesis(cg) 자체에 관한 단일 스킬. 'cg' = contents-genesis (npm 패키지 contents-genesis, 원본 저장소 github.com/obov/contents-genesis, 로컬 원본 ../contents-genesis). 분기: (1) 프로젝트 구성·커스텀·변경 이력 조회 (2) cg 버전 갱신·공유 스킬 받기 (3) 원본 저장소에서 공유 스킬 추가·수정·npm 배포 (4) 버전업 없이 이 머신의 로컬 레지스트리(~/.cg/skills)로 프로젝트 간 스킬 공유 (5) 공용 모듈(cg-* 저장소) 태그 의존 · 개발 모드(bun link) · 모듈 릴리스 · 데이터 홈(~/.cg/data). \"모듈 뭐 있어\", \"pipeline 구성\", \"커스텀한 거\", \"최근 변경\", \"production 어떻게 돌려\", \"cg 받아줘\", \"cg 최신화\", \"0.4.x로 스킬 공유했어\", \"<스킬명> 받아줘\", \"cg에 스킬 추가\", \"스킬 공유해줘\", \"cg 배포\", \"npm 배포\", \"버전 올려줘\", \"로컬 스킬 공유\", \"프로젝트 간 스킬 공유\", \"이 스킬 다른 프로젝트에서도 쓰게\", \"local:<스킬명>\", \"skill publish\", \"모듈 태그\", \"모듈 버전 올려\", \"모듈 고치면서 테스트\", \"bun link\", \"link: 로 연결\", \"공용 모듈 받기\", \"데이터 홈\", \"모듈 데이터 어디\" 요청. 콘텐츠 작업 스킬(kit-*)과 별개."
 metadata:
-  version: "1.2.0"
+  version: "1.3.0"
 ---
 
 # cg (contents-genesis)
@@ -121,6 +121,8 @@ bun cg check                       # missing_local_skills: 이 머신 레지스�
 - 모든 cg 사용자에게 배포하려면 원본 `skills/<name>` 으로 옮겨 B3
 - 버전 · 백업 (cg-backup 0.2+): 모든 로컬 스킬은 SKILL.md `metadata.version` 필수, 수정하면 버전 올림. 백업 브랜치 `skills/local` + 태그 `skills/<name>@<버전>`. 위반은 `bun cg run backup skills-check` (세션 시작 hook 은 `check --brief`)
 - 모듈 저장소 안 스킬(`<모듈>/skills/kit-*`)을 레지스트리에 연결할 때는 symlink (내용 · 이력은 모듈 저장소)
+- 같은 스킬을 패키지(`skills/`)와 모듈 저장소 두 곳에 두지 않음. 모듈 명령과 묶인 kit 은 모듈 저장소가 원본 (예: kit-youtube-upload = cg-release, 0.4.11 에서 패키지에서 제거 → `local:kit-youtube-upload`)
+- 프로젝트에 공유 스킬을 복사해 고치지 않음. 노하우는 원본(B3)으로 올리고 프로젝트 전용 부분(도구 경로 등)만 프로젝트 스킬에
 
 ## B5. 공용 모듈 (cg-* 저장소)
 
