@@ -2,7 +2,7 @@
 name: cg-context
 description: "contents-genesis(cg) 자체에 관한 단일 스킬. 'cg' = contents-genesis (npm 패키지 contents-genesis, 원본 저장소 github.com/obov/contents-genesis, 로컬 원본 ../contents-genesis). 분기: (1) 프로젝트 구성·커스텀·변경 이력 조회 (2) cg 버전 갱신·공유 스킬 받기 (3) 원본 저장소에서 공유 스킬 추가·수정·npm 배포 (4) 버전업 없이 이 머신의 로컬 레지스트리(~/.cg/skills)로 프로젝트 간 스킬 공유 (5) 공용 모듈(cg-* 저장소) 태그 의존 · 개발 모드(bun link) · 모듈 릴리스 · 데이터 홈(~/.cg/data). \"모듈 뭐 있어\", \"pipeline 구성\", \"커스텀한 거\", \"최근 변경\", \"production 어떻게 돌려\", \"cg 받아줘\", \"cg 최신화\", \"0.4.x로 스킬 공유했어\", \"<스킬명> 받아줘\", \"cg에 스킬 추가\", \"스킬 공유해줘\", \"cg 배포\", \"npm 배포\", \"버전 올려줘\", \"로컬 스킬 공유\", \"프로젝트 간 스킬 공유\", \"이 스킬 다른 프로젝트에서도 쓰게\", \"local:<스킬명>\", \"skill publish\", \"모듈 태그\", \"모듈 버전 올려\", \"모듈 고치면서 테스트\", \"bun link\", \"link: 로 연결\", \"공용 모듈 받기\", \"데이터 홈\", \"모듈 데이터 어디\" 요청. 콘텐츠 작업 스킬(kit-*)과 별개."
 metadata:
-  version: "1.1.0"
+  version: "1.2.0"
 ---
 
 # cg (contents-genesis)
@@ -119,7 +119,7 @@ bun cg check                       # missing_local_skills: 이 머신 레지스�
 - 같은 이름의 패키지 공유 스킬이 연결돼 있으면 거부 → `skill remove <name>` 후 재시도
 - 다른 머신 클론: `cg skill link` 결과 `missing` 에 표시 (실패 아님). 레지스트리에 스킬 복사 후 `cg skill link`
 - 모든 cg 사용자에게 배포하려면 원본 `skills/<name>` 으로 옮겨 B3
-- 버전 · 백업 (cg-backup 0.2+): 모든 로컬 스킬은 SKILL.md `metadata.version` 필수, 수정하면 버전 올림. 백업 브랜치 `skills/local` + 태그 `skills/<name>@<버전>`. 위반은 `bun cg run backup skills-check` (세션 시작 hook 에 `--brief`)
+- 버전 · 백업 (cg-backup 0.2+): 모든 로컬 스킬은 SKILL.md `metadata.version` 필수, 수정하면 버전 올림. 백업 브랜치 `skills/local` + 태그 `skills/<name>@<버전>`. 위반은 `bun cg run backup skills-check` (세션 시작 hook 은 `check --brief`)
 - 모듈 저장소 안 스킬(`<모듈>/skills/kit-*`)을 레지스트리에 연결할 때는 symlink (내용 · 이력은 모듈 저장소)
 
 ## B5. 공용 모듈 (cg-* 저장소)
@@ -162,6 +162,9 @@ git tag -a vX.Y.Z -m "cg-<id> vX.Y.Z" && git push origin vX.Y.Z   # 4. 태그 = 
 위치     CG_DATA_HOME ?? ~/.cg/data  +  /<모듈 id>   (모듈 코드가 직접 계산. 모듈 폴더 · import.meta.dir 아래 쓰기 금지)
 백업     module.json "backup": { "home": true }  → cg-backup 이 브랜치 module/<모듈 id> 로 주기 백업
 복원     bun cg run backup restore-module <모듈 id> ~/.cg/data/<모듈 id>
+기록     데이터 홈(~/.cg/data)을 git 저장소로 두고(private 원격) 바꾼 작업 안에서 이유를 적어 커밋 · push
+         "<모듈 폴더>: <변경> (<이유 · 근거>)". 자동 백업은 안전망 (이유 없음)
+검사     bun cg run backup check --brief   (세션 시작 hook: 로컬 스킬 버전 위반 + 데이터 홈 미커밋 · 미push)
 ```
 
 ## 규칙
