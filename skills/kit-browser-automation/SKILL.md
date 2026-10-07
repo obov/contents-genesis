@@ -1,22 +1,26 @@
 ---
 name: kit-browser-automation
-description: "[재사용] ego-browser 자동화 공통 노하우. 어떤 사이트든 브라우저 작업 전에 먼저 읽는다: 스크립트 실행(환경변수·cwd 미전달), 사용자 제어 전환, alert/confirm으로 인한 멈춤, iframe 좌표 클릭, 팝업·파일 업로드·blob 저장, 속도 제한(429)·SPA 대기, 검증 습관. 네이버·ChatGPT에서 검증된 사례 포함."
+description: "[재사용] ego-browser 자동화 공통 노하우. 어떤 사이트든 브라우저 작업 전에 먼저 읽는다: 스크립트 실행(환경변수·cwd 미전달), 세션 간 TaskSpace 충돌, 사용자 제어 전환, alert/confirm으로 인한 멈춤, iframe 좌표 클릭, 팝업·파일 업로드·blob 저장, 스마트스토어 지연 로딩·Q&A 펼치기, 속도 제한(429)·SPA 대기, 검증 습관. 네이버·ChatGPT에서 검증된 사례 포함."
 metadata:
-  version: "1.0.0"
+  version: "1.1.0"
 ---
 
 # 브라우저 자동화 공통 노하우 (재사용 키트) (2026-09-30 ~ 10-01 실전에서 확인)
 
-> 재사용 키트: 사이트별 사례(네이버·ChatGPT)는 실전에서 검증한 **예시**. 다른 사이트에서는 패턴만 가져간다. 스크립트 경로는 각 프로젝트의 `tools/` 기준.
+> 재사용 키트: 사이트별 사례(네이버·ChatGPT)는 실전에서 검증한 **예시**. 다른 사이트에서는 패턴만 가져간다. 스크립트 경로는 각 프로젝트의 `tools/` 기준. 프로젝트 전용 수집 도구 목록은 각 프로젝트 스킬에 둔다.
 
 ## 1. ego-browser 스크립트 실행
 
 - `ego-browser nodejs`는 호출 셸의 **환경변수·cwd를 전달받지 않음**
   - 파일 경로는 항상 절대 경로
-  - 값 전달은 `.sh` 래퍼가 `Object.assign(process.env, {...})`를 스크립트 앞에 붙여 파이프
+  - 값 전달은 `.sh` 래퍼가 `Object.assign(process.env, {...})`를 스크립트 앞에 붙여 파이프 (예: cg-seeds `run.ts` collect)
   - heredoc에서 셸 변수를 쓰려면 `<<EOF`(따옴표 없음), JS 템플릿 문자열 `${}`·백틱이 셸에 먹히지 않게 주의. 백틱이 들어간 python/markdown 편집은 `<<'EOF'`로
 - TaskSpace는 작업 목표당 1개. 스페이스 번호를 기록하고 이후 `taskSpace(<id>)`로 재사용
 - `task.finish()`가 가끔 오래 걸림 → 백그라운드 타임아웃 나도 결과물(파일·설정)은 이미 저장됨. 재시도 불필요
+- 스냅샷 ref(`@N`)는 `ego-browser nodejs` 프로세스마다 무효 → 같은 스크립트 안에서 `snapshot()` 후 클릭 (2026-10-04). 접힌 목록(스마트스토어 Q&A `더보기`, oopy·노션 FAQ 토글)은 `snapshot({scope:"full_page"})`로 버튼 ref를 찾거나 `page.click('text="<질문>"')`
+- 다른 세션·사용자가 닫은 탭은 `page pN was closed` → 열려 있는 탭(p1 등)을 쓴다 (2026-10-04)
+- **같은 TaskSpace를 다른 세션이 조작하면 충돌** (2026-10-05): 내 `p1`이 다른 세션 작업 URL로 바뀌고, 수집 스크립트가 `CDP Input.dispatchMouseEvent timed out`·`No resource with given identifier`로 두 번 실패, 이후 `task space not found: 39`(다른 세션이 닫음). 스페이스 번호는 세션 간 공유 금지. 실행 전 `task.tabs()`로 `p1` URL이 내 것인지 확인, 다른 세션 스크립트(`ps` 의 `ego-browser nodejs`)가 돌 때는 끝난 뒤 실행. 스페이스가 사라진 경우에만 새로 만들고 id를 기록. 2026-10-07: 여러 세션 동시 실행 중 이름 붙인 스페이스가 생성 도중 두 번 사라짐 → 긴 일괄 작업은 단위마다 새 스페이스를 만들고 실패 시 1회 재시도
+- 백그라운드 `( a; b ) &` 서브셸은 바깥 명령의 완료 알림이 먼저 옴 → 실제 완료는 로그 파일 끝 줄(`=== done` 등)로 확인. 로그가 비어 있어도 죽은 게 아님(수집 스크립트는 끝에 한 번 출력) → 재실행 전 `ps aux | grep <스크립트명>`으로 확인. 같은 TaskSpace에서 두 프로세스가 돌면 약 40분 낭비 (2026-10-05 후기 수집)
 
 ## 2. 사용자 제어 전환
 
@@ -24,6 +28,7 @@ metadata:
 - 사용자가 "계속/ㄱㄱ/ㅇㅇ" 등으로 진행을 지시하면 `takeOverTaskSpace(<id>)` 후 재개
 - 재개 직후 현재 상태를 먼저 읽는다 (사용자가 내용을 바꿨을 수 있음)
 - 로그인 필요 시 로그인 페이지를 연 뒤 `task.handOff()` → 사용자 로그인 → 재개
+- 사용자에게 넘기는 화면은 번호로 안내하지 않는다: 사용자는 TaskSpace 번호를 볼 수 없음 (2026-10-05 사용자 지적). `taskSpace("<작업 이름>")`처럼 이름을 붙여 새로 만들고 이름·사이트로 안내
 
 ## 3. 대화상자 (alert/confirm)
 
@@ -47,6 +52,10 @@ metadata:
 - 외부 이미지 저장: `page.fetch`는 CORS로 실패하는 경우 많음 → `curl -H "Referer: <원 사이트>"`
 - `blob:` 이미지(ChatGPT 생성물)는 페이지 안에서 `fetch(blob)` → base64 → Node에서 파일 저장
 - 이미지 확인은 `sips -Z 500 in --out out` 축소 후 Read (PIL 없음), 형식 변환 `sips -s format jpeg`
+- 스마트스토어 상세 이미지는 지연 로딩: `src`가 1px `data:image` 이면 `data-src`(`shop-phinf...?type=w848`)를 `curl -H "Referer: https://brand.naver.com/"`으로 받음. 인증서·반품 안내 이미지에 정책·수치가 있어 텍스트가 있는 이미지는 모두 열람 (2026-10-05: 시험성적서, 제공고시와 다른 반품 안내). GIF는 `ffmpeg -vf "fps=1,scale=350:-1,tile=4x3"`으로 프레임 모음 이미지 생성
+- 스마트스토어 Q&A 답변 펼치기 (2026-10-05): 인라인 목록(3건)과 `Q&A 전체보기` 다이얼로그가 같은 질문을 중복 → `[role=dialog] li`로 한정(52건이 한 번에 로드). 항목은 `scrollIntoView` + 400ms 대기 후 anchor 좌표로 `page.mouse.click` (페이지 안 `element.click()`·`text=` 클릭은 중복 요소 오류), 펼침 상태는 항목 텍스트의 `접기`(열림)/`더보기`(닫힘). 열린 상태에서 `page.keyboard.press("Escape")`
+- 네이버 쇼핑 CDN `shop-phinf.pstatic.net/...?type=w500`은 0바이트일 수 있음 → `type=o1000`. 스마트스토어 상세 이미지는 `상세정보 펼쳐보기` 클릭 후 `#INTRODUCE` 안 img (2026-10-04)
+- `sips -c <h> <w> --cropOffset <y> 0`에서 `y+h`가 이미지 끝 이상이면 원본 전체가 나옴 → 마지막 조각은 끝보다 안쪽 offset으로 (2026-10-04)
 
 ## 6. 속도 제한·SPA
 
