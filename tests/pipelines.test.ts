@@ -202,7 +202,7 @@ test("items pick their pipeline; --pipeline overrides for item-less operations",
     pipelines: { one: { use: "./pipelines/one" } },
     default_pipeline: "one",
   });
-});
+}, 15_000); // cg 프로세스 여러 번 실행 (CI 에서 약 4초, 기본 5초 제한 경계)
 
 test("legacy production.renderer still means the remotion pipeline", () => {
   const { root } = project({});
