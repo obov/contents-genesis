@@ -1,4 +1,5 @@
 import { existsSync } from "node:fs";
+import { linkedDependencies, linkedDependencyWarning } from "./deps.ts";
 import { resolve } from "node:path";
 import { pathToFileURL } from "node:url";
 import { Catalog } from "../../core/catalog.ts";
@@ -233,13 +234,16 @@ async function main(): Promise<unknown> {
     case "check": {
       const project = root(),
         catalog = new Catalog(project),
-        skills = linkSkills(project);
+        skills = linkSkills(project),
+        links = linkedDependencies(project);
+      for (const d of links) console.error("warning: " + linkedDependencyWarning(d));
       if (skills.broken.length)
         throw new Error("Broken shared skills: " + skills.broken.join(", "));
       return {
         doctor: catalog.doctor(),
         skills: skills.linked,
         ...(skills.missing.length ? { missing_local_skills: skills.missing } : {}),
+        ...(links.length ? { linked_dependencies: links } : {}),
         architecture: existsSync(resolve(project, "architecture/registry.json"))
           ? checkArchitecture(project)
           : null,

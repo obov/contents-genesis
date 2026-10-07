@@ -261,3 +261,22 @@ test("shared skill version bumps are diffed; old state files are not", () => {
   ]);
   expect(diffStates(state(), state({ "kit-suno": "1.1.0" }))).toEqual([]);
 });
+
+test("pinned dependency installed as a local link is warned (dev-mode leftover)", () => {
+  const root = init("--no-renderer"),
+    pkgFile = resolve(root, "package.json"),
+    pkg = JSON.parse(readFileSync(pkgFile, "utf8"));
+  const other = mkdtempSync(resolve(tmpdir(), "cg-dep-"));
+  roots.push(other);
+  writeFileSync(resolve(other, "package.json"), '{"name":"cg-dep","version":"0.2.0"}');
+  pkg.dependencies = { ...pkg.dependencies, "cg-dep": "git+ssh://git@example.com/o/cg-dep.git#v0.2.0", "cg-local": "link:cg-local" };
+  writeFileSync(pkgFile, JSON.stringify(pkg));
+  symlinkSync(other, resolve(root, "node_modules/cg-dep"), "dir");
+  symlinkSync(other, resolve(root, "node_modules/cg-local"), "dir");
+  const brief = cg(root, "context", "--brief").out;
+  expect(brief).toContain("dependency cg-dep is a local link");
+  expect(brief).not.toContain("dependency cg-local"); // link: spec is meant to be a link
+  rmSync(resolve(root, "node_modules/cg-dep"));
+  mkdirSync(resolve(root, "node_modules/cg-dep"));
+  expect(cg(root, "context", "--brief").out).not.toContain("dependency cg-dep");
+});

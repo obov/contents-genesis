@@ -1,4 +1,5 @@
 import { existsSync, lstatSync, readdirSync, realpathSync } from "node:fs";
+import { linkedDependencies, linkedDependencyWarning } from "./deps.ts";
 import { relative, resolve } from "node:path";
 import { Catalog } from "../../core/catalog.ts";
 import { readJson } from "../../core/files.ts";
@@ -284,6 +285,8 @@ export async function inventory(
   for (const s of shared)
     if (!s.linked)
       warnings.push(`shared skill ${s.name} not linked; run cg skill link`);
+  for (const d of linkedDependencies(root))
+    warnings.push(linkedDependencyWarning(d));
   const projectSkills = present
     .filter((n) => !n.startsWith(".") && !isLink(n))
     .map((name) => ({ name, ...versionOf(resolve(skillsDir, name)) }));
